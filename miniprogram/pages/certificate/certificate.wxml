@@ -9,6 +9,7 @@
     </view>
     <view class="certificate-body">
       <text class="certificate-id mono">PATCH-WALK-{{certificateId}}</text>
+      <text class="certificate-owner">{{ownerName}} 的健康完赛凭证</text>
       <view class="score"><text>3/3</text><text>打卡完成</text></view>
       <view class="certificate-stations">
         <view wx:for="{{stations}}" wx:key="id">

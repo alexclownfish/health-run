@@ -1,6 +1,7 @@
 const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
 const { formatClock, formatDateCode } = require('../../utils/format')
+const userStore = require('../../utils/user')
 
 Page({
   data: {
@@ -8,7 +9,8 @@ Page({
     certificateId: '',
     completedTime: '',
     completed: 0,
-    certificateReady: false
+    certificateReady: false,
+    ownerName: '微信用户'
   },
 
   onLoad() {
@@ -26,7 +28,8 @@ Page({
       completed: progress.completed,
       certificateReady: progress.completed === 3,
       certificateId: formatDateCode(timestamp),
-      completedTime: formatClock(timestamp)
+      completedTime: formatClock(timestamp),
+      ownerName: userStore.readUser().nickName || '微信用户'
     })
   },
 

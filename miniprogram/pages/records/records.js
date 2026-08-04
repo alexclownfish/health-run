@@ -1,11 +1,15 @@
+const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
-const { formatClock } = require('../../utils/format')
+const { getMonthGrid, dateKey, formatClock } = require('../../utils/format')
 
 Page({
   data: {
     stats: progressStore.deriveStats(),
-    progressStyle: '50%',
-    recentActivities: []
+    progressStyle: '0%',
+    recentActivities: [],
+    calendar: getMonthGrid(),
+    monthOffset: 0,
+    canGoNext: false
   },
 
   onShow() {
@@ -20,23 +24,42 @@ Page({
   refreshStats() {
     const progress = progressStore.readProgress()
     const stats = progressStore.deriveStats(progress)
-    const recentActivities = []
-    if (progress.completed > 0) {
-      recentActivities.push({
-        day: '04',
-        month: 'AUG',
-        title: progress.completed === 3 ? '午间漫步 · 健康同行' : '午间漫步 · 进行中',
-        detail: `${stats.distance} km · ${progress.completed}/3 点位 · ${formatClock(progress.completedAt || progress.startedAt)}`,
-        status: progress.completed === 3 ? '完成' : '进行中'
-      })
-    }
-    recentActivities.push({
-      day: '31',
-      month: 'JUL',
-      title: '园区活力路线',
-      detail: '0.86 km · 16 分钟',
-      status: '完成'
+    const history = progress.history.slice().sort((left, right) => right.at - left.at)
+    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+    const recentActivities = history.slice(0, 8).map((entry) => {
+      const date = new Date(entry.at)
+      const station = stations[entry.station - 1]
+      return {
+        day: String(date.getDate()).padStart(2, '0'),
+        month: monthNames[date.getMonth()],
+        title: station ? `点位 ${entry.station} · ${station.title}` : '健康点位',
+        detail: `${Number(entry.distance).toFixed(2)} km · ${formatClock(entry.at)}`,
+        status: '完成'
+      }
     })
-    this.setData({ stats, progressStyle: `${stats.percent}%`, recentActivities })
+    const target = this.getTargetMonth()
+    const activeDates = history.map((entry) => dateKey(entry.at))
+    this.setData({
+      stats,
+      progressStyle: `${stats.percent}%`,
+      recentActivities,
+      calendar: getMonthGrid(target.year, target.month, activeDates),
+      canGoNext: this.data.monthOffset < 0
+    })
+  },
+
+  getTargetMonth() {
+    const now = new Date()
+    const target = new Date(now.getFullYear(), now.getMonth() + this.data.monthOffset, 1)
+    return { year: target.getFullYear(), month: target.getMonth() }
+  },
+
+  previousMonth() {
+    this.setData({ monthOffset: this.data.monthOffset - 1 }, () => this.refreshStats())
+  },
+
+  nextMonth() {
+    if (this.data.monthOffset >= 0) return
+    this.setData({ monthOffset: this.data.monthOffset + 1 }, () => this.refreshStats())
   }
 })

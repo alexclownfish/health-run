@@ -2,20 +2,20 @@
   <view class="page-heading"><text class="eyebrow">ACTIVITY LOG</text><text class="page-title">运动记录</text></view>
 
   <view class="week-summary">
-    <view class="summary-copy"><text>本周健康能量</text><text>{{stats.energy}}</text><text class="mono">ENERGY POINTS</text></view>
+    <view class="summary-copy"><text>本次路线能量</text><text>{{stats.energy}}</text><text class="mono">ENERGY POINTS</text></view>
     <view class="energy-ring" style="--percent: {{progressStyle}};"><view><text>{{stats.percent}}%</text></view></view>
   </view>
 
   <view class="metric-grid">
     <view class="card"><text class="metric-icon">⌁</text><text class="metric-value mono">{{stats.distance}}</text><text class="metric-label">累计公里</text></view>
-    <view class="card"><text class="metric-icon">♨</text><text class="metric-value mono">{{stats.calories}}</text><text class="metric-label">活力消耗</text></view>
+    <view class="card"><text class="metric-icon">◷</text><text class="metric-value mono">{{stats.durationMinutes}}</text><text class="metric-label">实际分钟</text></view>
     <view class="card"><text class="metric-icon">✓</text><text class="metric-value mono">{{stats.points}}</text><text class="metric-label">完成点位</text></view>
   </view>
 
   <view class="calendar card">
-    <view class="section-head calendar-head"><view><text class="section-kicker">AUGUST</text><text class="section-title">本月节奏</text></view><text class="section-side">2026.08</text></view>
+    <view class="section-head calendar-head"><view><text class="section-kicker">ACTIVITY CALENDAR</text><text class="section-title">真实打卡节奏</text></view><view class="calendar-nav"><text bindtap="previousMonth">‹</text><text>{{calendar.monthLabel}}</text><text class="{{canGoNext ? '' : 'disabled'}}" bindtap="nextMonth">›</text></view></view>
     <view class="week-labels"><text>一</text><text>二</text><text>三</text><text>四</text><text>五</text><text>六</text><text>日</text></view>
-    <view class="week-days"><text>3</text><text class="today">4<view></view></text><text>5</text><text>6</text><text>7</text><text>8</text><text>9</text></view>
+    <view class="week-days"><view wx:for="{{calendar.cells}}" wx:key="key" class="day-cell {{item.today ? 'today' : ''}} {{item.active ? 'active' : ''}} {{item.muted ? 'muted' : ''}}">{{item.day}}</view></view>
   </view>
 
   <view class="section-head"><view><text class="section-kicker">RECENT</text><text class="section-title">最近活动</text></view></view>
@@ -25,5 +25,6 @@
       <view class="history-copy"><text>{{item.title}}</text><text>{{item.detail}}</text></view>
       <text class="history-status">{{item.status}}</text>
     </view>
+    <view wx:if="{{!recentActivities.length}}" class="empty-history"><text>还没有打卡记录</text><text>完成第一个 NFC 点位后，这里会显示真实活动。</text></view>
   </view>
 </view>

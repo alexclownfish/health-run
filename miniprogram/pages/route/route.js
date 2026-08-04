@@ -1,6 +1,8 @@
 const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
 const nfc = require('../../utils/nfc')
+const userStore = require('../../utils/user')
+const { getActivityContext } = require('../../utils/format')
 
 Page({
   data: {
@@ -10,10 +12,17 @@ Page({
     ctaLabel: '开始漫步',
     nfcVisible: false,
     nfcLoading: false,
-    currentStation: null
+    currentStation: null,
+    user: userStore.defaultUser(),
+    userInitial: '我',
+    activity: getActivityContext(),
+    showSimulation: false
   },
 
   onLoad() {
+    const account = typeof wx.getAccountInfoSync === 'function' ? wx.getAccountInfoSync() : null
+    const envVersion = account && account.miniProgram ? account.miniProgram.envVersion : 'release'
+    this.setData({ showSimulation: envVersion === 'develop' })
     this.refreshProgress()
   },
 
@@ -53,11 +62,19 @@ Page({
       stations: viewStations,
       completed: progress.completed,
       progressTitle,
-      ctaLabel
+      ctaLabel,
+      user: userStore.readUser(),
+      userInitial: this.getUserInitial(userStore.readUser()),
+      activity: getActivityContext()
     })
   },
 
+  getUserInitial(user) {
+    return user && user.nickName ? user.nickName.charAt(0) : '我'
+  },
+
   handleStart() {
+    wx.vibrateShort({ type: 'light' })
     if (this.data.completed === 3) {
       wx.navigateTo({ url: '/pages/certificate/certificate' })
       return
@@ -77,6 +94,7 @@ Page({
       wx.showToast({ title: '该点位已完成', icon: 'success' })
       return
     }
+    wx.vibrateShort({ type: 'light' })
     this.openNfc(index)
   },
 
@@ -100,21 +118,18 @@ Page({
     this.setData({ nfcLoading: true })
     nfc.discoverOnce(8000)
       .then(() => {
-        wx.vibrateShort({ type: 'medium' })
-        this.enterCurrentStation()
+        this.enterCurrentStation('nfc')
       })
       .catch((error) => {
         this.setData({ nfcLoading: false })
         const unsupported = error && error.message === 'NFC_UNSUPPORTED'
         wx.showModal({
           title: unsupported ? '当前设备不支持 NFC' : '暂未读取到标签',
-          content: unsupported ? '请在支持 NFC 的安卓设备上体验真实感应，当前可使用模拟入口继续联调。' : '请将手机顶部贴近标牌后重试，也可以使用模拟入口继续。',
-          confirmText: '模拟继续',
-          cancelText: '重新感应',
+          content: unsupported ? '请在支持 NFC 的安卓设备上体验真实感应。当前设备无法继续本次打卡。' : '请将手机顶部贴近标牌后重试。',
+          confirmText: '知道了',
+          cancelText: '重试',
           confirmColor: '#005D46',
-          success: (result) => {
-            if (result.confirm) this.simulateNfc()
-          }
+          success: () => {}
         })
       })
   },
@@ -123,38 +138,15 @@ Page({
     if (this.data.nfcLoading) return
     this.setData({ nfcLoading: true })
     setTimeout(() => {
-      wx.vibrateShort({ type: 'medium' })
-      this.enterCurrentStation()
+      this.enterCurrentStation('simulation')
     }, 650)
   },
 
-  enterCurrentStation() {
+  enterCurrentStation(source) {
     const index = this.data.currentStation.id - 1
+    progressStore.checkInStation(index, source)
+    wx.vibrateShort({ type: 'medium' })
     this.setData({ nfcVisible: false, nfcLoading: false })
     wx.navigateTo({ url: `/pages/action/action?station=${index}` })
   },
-
-  manualCheckIn() {
-    const index = this.data.currentStation.id - 1
-    this.setData({ nfcVisible: false })
-    wx.navigateTo({ url: `/pages/action/action?station=${index}&manual=1` })
-  },
-
-  demoComplete() {
-    wx.showModal({
-      title: '演示完赛',
-      content: '将直接完成全部 3 个点位，用于快速查看完赛凭证。',
-      confirmText: '继续演示',
-      confirmColor: '#005D46',
-      success: (result) => {
-        if (!result.confirm) return
-        let progress = progressStore.startRoute()
-        stations.forEach((station, index) => {
-          progress = progressStore.completeStation(index)
-        })
-        this.refreshProgress()
-        wx.navigateTo({ url: '/pages/certificate/certificate' })
-      }
-    })
-  }
 })

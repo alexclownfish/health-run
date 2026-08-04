@@ -25,9 +25,9 @@
 
   <view class="timer-card card">
     <text class="timer-text mono">{{timerText}}</text>
-    <button class="timer-button {{timerComplete ? 'complete' : ''}}" bindtap="toggleTimer">
-      <text>{{timerComplete ? '✓' : timerRunning ? 'Ⅱ' : '▷'}}</text>
-      <text>{{timerComplete ? '重新计时' : timerRunning ? '暂停' : '开始计时'}}</text>
+    <button class="timer-button {{timerComplete ? 'complete' : ''}}" bindtap="toggleTimer" disabled="{{timerComplete}}">
+      <text>{{timerComplete ? '✓' : timerRunning ? 'Ⅱ' : actionStarted ? '▷' : '▶'}}</text>
+      <text>{{timerComplete ? '动作完成' : timerRunning ? '暂停' : actionStarted ? '继续动作' : '开始动作'}}</text>
     </button>
   </view>
 
@@ -37,6 +37,6 @@
   </view>
 
   <view class="fixed-action">
-    <button class="primary-button" bindtap="goUpload"><text>动作完成，去拍照</text><text class="arrow">⌁</text></button>
+    <button class="primary-button" disabled="{{!actionComplete}}" bindtap="goUpload"><text>{{actionComplete ? '动作完成，去拍照' : '先完成动作计时'}}</text><text class="arrow">⌁</text></button>
   </view>
 </view>

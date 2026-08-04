@@ -1,17 +1,15 @@
 const progress = require('./utils/progress')
+const userStore = require('./utils/user')
 
 App({
   globalData: {
     routeId: 'route-01',
-    user: {
-      name: '林小跑',
-      department: '产品设计部',
-      level: 4,
-      energy: 680
-    }
+    user: userStore.defaultUser()
   },
 
   onLaunch() {
     progress.ensureProgress()
+    this.globalData.user = userStore.readUser()
+    if (wx.cloud && typeof wx.cloud.init === 'function') wx.cloud.init({ traceUser: true })
   }
 })

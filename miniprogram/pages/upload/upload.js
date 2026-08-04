@@ -1,5 +1,6 @@
 const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
+const photoService = require('../../utils/photo')
 
 Page({
   data: {
@@ -17,8 +18,8 @@ Page({
   onLoad(options) {
     const stationIndex = Math.min(Math.max(Number(options.station) || 0, 0), 2)
     const progress = progressStore.readProgress()
-    if (stationIndex > progress.completed) {
-      wx.showToast({ title: '请按路线依次打卡', icon: 'none' })
+    if (stationIndex !== progress.completed || !progressStore.canUpload(progress, stationIndex)) {
+      wx.showToast({ title: '请先完成动作计时', icon: 'none' })
       setTimeout(() => wx.navigateBack({ delta: 2 }), 900)
       return
     }
@@ -39,6 +40,7 @@ Page({
           return
         }
         this.setData({ photoPath: file.tempFilePath })
+        wx.vibrateShort({ type: 'light' })
       },
       fail: (error) => {
         if (!error.errMsg || !error.errMsg.includes('cancel')) {
@@ -63,10 +65,21 @@ Page({
       wx.showToast({ title: '请先确认照片隐私设置', icon: 'none' })
       return
     }
+    if (!this.data.photoPath) {
+      wx.showToast({ title: '请先拍照或选择照片', icon: 'none' })
+      wx.vibrateShort({ type: 'light' })
+      return
+    }
 
     this.setData({ submitting: true })
-    this.persistPhoto((savedPath) => {
+    photoService.uploadCheckInPhoto(this.data.photoPath, this.data.stationIndex)
+      .then((savedPath) => {
       const progress = progressStore.completeStation(this.data.stationIndex, savedPath)
+      if (progress.completed <= this.data.stationIndex) {
+        this.setData({ submitting: false })
+        wx.showToast({ title: '上传状态失效，请重新完成动作', icon: 'none' })
+        return
+      }
       this.setData({
         submitting: false,
         successVisible: true,
@@ -75,19 +88,17 @@ Page({
         continueLabel: progress.completed === 3 ? '生成完赛凭证' : '查看下一站'
       })
       wx.vibrateShort({ type: 'medium' })
-    })
-  },
-
-  persistPhoto(callback) {
-    if (!this.data.photoPath) {
-      setTimeout(() => callback(''), 450)
-      return
-    }
-    wx.saveFile({
-      tempFilePath: this.data.photoPath,
-      success: (result) => callback(result.savedFilePath || this.data.photoPath),
-      fail: () => callback(this.data.photoPath)
-    })
+      })
+      .catch(() => {
+        this.setData({ submitting: false })
+        wx.vibrateShort({ type: 'heavy' })
+        wx.showModal({
+          title: '照片上传失败',
+          content: '请检查网络或云开发环境后重试。照片未上传成功，本点位不会解锁。',
+          showCancel: false,
+          confirmColor: '#005D46'
+        })
+      })
   },
 
   preventClose() {},

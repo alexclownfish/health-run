@@ -1,30 +1,79 @@
 const progressStore = require('../../utils/progress')
+const userStore = require('../../utils/user')
 
 Page({
   data: {
-    user: {},
+    user: userStore.defaultUser(),
+    userInitial: '我',
+    stats: progressStore.deriveStats(),
     completed: 0,
-    reminderEnabled: true
+    badges: []
   },
 
   onShow() {
-    const app = getApp()
-    const progress = progressStore.readProgress()
-    this.setData({ user: app.globalData.user, completed: progress.completed })
+    this.refreshProfile()
   },
 
-  toggleReminder() {
-    this.setData({ reminderEnabled: !this.data.reminderEnabled })
-    wx.showToast({
-      title: this.data.reminderEnabled ? '活动提醒已开启' : '活动提醒已关闭',
-      icon: 'none'
+  refreshProfile() {
+    const user = userStore.readUser()
+    const progress = progressStore.readProgress()
+    const stats = progressStore.deriveStats(progress)
+    this.setData({
+      user,
+      userInitial: user.nickName ? user.nickName.charAt(0) : '我',
+      stats,
+      completed: progress.completed,
+      badges: [
+        { icon: '♙', title: '初次出发', color: 'lime', unlocked: progress.history.length > 0 },
+        { icon: 'ϟ', title: '能量满格', color: 'blue', unlocked: progress.completed === 3 },
+        { icon: '☀', title: '完整路线', color: 'coral', unlocked: progress.completed === 3 }
+      ]
     })
+  },
+
+  onChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl
+    if (!avatarUrl) return
+    const user = userStore.saveUser({ ...this.data.user, avatarUrl })
+    getApp().globalData.user = user
+    this.setData({ user })
+    wx.vibrateShort({ type: 'light' })
+  },
+
+  requestWeChatProfile() {
+    if (typeof wx.getUserProfile !== 'function') {
+      wx.showToast({ title: '请分别选择头像并填写昵称', icon: 'none' })
+      return
+    }
+    wx.getUserProfile({
+      desc: '用于展示健康打卡昵称和头像',
+      success: (result) => {
+        const info = result.userInfo || {}
+        const user = userStore.saveUser({
+          nickName: info.nickName || this.data.user.nickName,
+          avatarUrl: info.avatarUrl || this.data.user.avatarUrl
+        })
+        getApp().globalData.user = user
+        this.setData({ user, userInitial: user.nickName ? user.nickName.charAt(0) : '我' })
+        wx.vibrateShort({ type: 'light' })
+      },
+      fail: (error) => {
+        if (!error.errMsg || !error.errMsg.includes('cancel')) wx.showToast({ title: '微信资料授权失败', icon: 'none' })
+      }
+    })
+  },
+
+  onNicknameBlur(event) {
+    const nickName = event.detail && event.detail.value ? event.detail.value : ''
+    const user = userStore.saveUser({ ...this.data.user, nickName })
+    getApp().globalData.user = user
+    this.setData({ user, userInitial: user.nickName ? user.nickName.charAt(0) : '我' })
   },
 
   showPrivacy() {
     wx.showModal({
       title: '隐私与照片',
-      content: '打卡照片仅保存在本机临时目录和本次活动记录中，当前版本不会上传到服务器或公开展示。',
+      content: '头像和昵称来自微信授权控件；打卡照片仅用于本次路线记录，当前版本不会公开展示。',
       showCancel: false,
       confirmText: '知道了',
       confirmColor: '#005D46'
@@ -33,21 +82,26 @@ Page({
 
   resetProgress() {
     wx.showModal({
-      title: '重置演示进度',
-      content: '将清除当前路线进度与照片记录，重新体验完整流程。',
+      title: '重置本次路线',
+      content: '会清除当前路线的点位、动作和照片记录，历史数据也会一并清除。',
       confirmText: '确认重置',
       confirmColor: '#E55B40',
       success: (result) => {
         if (!result.confirm) return
         progressStore.resetProgress()
-        this.setData({ completed: 0 })
-        wx.showToast({ title: '进度已重置', icon: 'success' })
+        this.refreshProfile()
+        wx.showToast({ title: '路线已重置', icon: 'success' })
         setTimeout(() => wx.switchTab({ url: '/pages/route/route' }), 650)
       }
     })
   },
 
-  showPlaceholder() {
-    wx.showToast({ title: '功能将在正式版开放', icon: 'none' })
+  showHelp() {
+    wx.showModal({
+      title: '打卡流程',
+      content: '到达点位后触碰 NFC，点击开始动作并完成计时，再拍照上传。只有照片上传成功后才会解锁下一站。',
+      showCancel: false,
+      confirmColor: '#005D46'
+    })
   }
 })

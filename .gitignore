@@ -1,4 +1,5 @@
 project.private.config.json
+miniprogram/project.config.json
 node_modules/
 .DS_Store
 npm-debug.log*

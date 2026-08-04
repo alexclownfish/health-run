@@ -2,37 +2,25 @@
   <view class="page-heading"><text class="eyebrow">MY PATCHWALK</text><text class="page-title">个人中心</text></view>
 
   <view class="profile-hero">
-    <view class="avatar">林</view>
-    <view class="profile-copy"><text>{{user.name}}</text><text>{{user.department}} · 活力探索者</text><text class="streak">连续打卡 6 天</text></view>
+    <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"><image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill"></image><text wx:else>{{userInitial}}</text></button>
+    <view class="profile-copy"><text>{{user.nickName || '微信用户'}}</text><input class="nickname-input" type="nickname" value="{{user.nickName}}" placeholder="点击填写微信昵称" bindblur="onNicknameBlur" /><button class="sync-profile" bindtap="requestWeChatProfile">同步微信资料</button><text class="route-status">本次路线 {{completed}} / 3 点位</text></view>
     <text class="chevron">›</text>
   </view>
 
   <view class="level-card card">
-    <view class="level-head"><text>当前等级</text><text class="mono">LV. 0{{user.level}} 绿道行者</text></view>
-    <view class="level-track"><view></view></view>
-    <view class="level-foot"><text>{{user.energy}} / 800 活力值</text><text>距升级还差 120</text></view>
+    <view class="level-head"><text>本次健康能量</text><text class="mono">{{stats.energy}} / 120</text></view>
+    <view class="level-track"><view style="width: {{stats.percent}}%;"></view></view>
+    <view class="level-foot"><text>{{stats.distance}} km 已记录</text><text>{{stats.durationMinutes ? stats.durationMinutes + ' 分钟' : '完成后生成时长'}}</text></view>
   </view>
 
-  <view class="section-head"><view><text class="section-kicker">BADGES</text><text class="section-title">我的徽章</text></view><text class="section-side">5 枚</text></view>
+  <view class="section-head"><view><text class="section-kicker">BADGES</text><text class="section-title">我的徽章</text></view><text class="section-side">{{badges.length}} 枚</text></view>
   <view class="badge-grid">
-    <view><view class="badge lime">♙</view><text>初次出发</text></view>
-    <view><view class="badge blue">ϟ</view><text>能量满格</text></view>
-    <view><view class="badge coral">☀</view><text>晨光同行</text></view>
-    <view><view class="badge locked">□</view><text>等待解锁</text></view>
+    <view wx:for="{{badges}}" wx:key="title"><view class="badge {{item.color}} {{item.unlocked ? '' : 'is-locked'}}">{{item.icon}}</view><text>{{item.title}}</text></view>
   </view>
 
   <view class="settings-list card">
-    <view bindtap="toggleReminder">
-      <view class="setting-icon">♢</view><text>活动提醒</text><text>{{reminderEnabled ? '工作日 12:15' : '已关闭'}}</text><text class="chevron">›</text>
-    </view>
-    <view bindtap="showPrivacy">
-      <view class="setting-icon">◇</view><text>隐私与照片</text><text>仅自己可见</text><text class="chevron">›</text>
-    </view>
-    <view bindtap="resetProgress">
-      <view class="setting-icon">↶</view><text>重置演示进度</text><text>{{completed}} / 3 点位</text><text class="chevron">›</text>
-    </view>
-    <view bindtap="showPlaceholder">
-      <view class="setting-icon">?</view><text>帮助与反馈</text><text></text><text class="chevron">›</text>
-    </view>
+    <view bindtap="showPrivacy"><view class="setting-icon">◇</view><text>隐私与照片</text><text>仅自己可见</text><text class="chevron">›</text></view>
+    <view bindtap="resetProgress"><view class="setting-icon">↶</view><text>重置本次路线</text><text>{{completed}} / 3 点位</text><text class="chevron">›</text></view>
+    <view bindtap="showHelp"><view class="setting-icon">?</view><text>打卡流程说明</text><text></text><text class="chevron">›</text></view>
   </view>
 </view>

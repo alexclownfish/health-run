@@ -1,21 +1,18 @@
 <view class="page route-page with-fixed-action">
   <view class="route-heading">
-    <view>
-      <text class="eyebrow">PATCHWALK / 轻跑计划</text>
-      <text class="page-title">午间漫步</text>
-    </view>
-    <view class="profile-dot">林</view>
+    <view><text class="eyebrow">PATCHWALK / 轻跑计划</text><text class="page-title">{{activity.title}}</text></view>
+    <view class="profile-dot"><image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill"></image><text wx:else>{{userInitial}}</text></view>
   </view>
 
   <view class="weather card">
-    <view class="weather-symbol">☀</view>
+    <view class="weather-symbol">◷</view>
     <view class="weather-copy">
-      <text>适合轻运动</text>
-      <text>多云 · 26°C · 微风</text>
+      <text>{{activity.scoreLabel}}</text>
+      <text>{{activity.subtitle}}</text>
     </view>
     <view class="weather-score">
-      <text>82</text>
-      <text>状态分</text>
+      <text>{{completed}} / 3</text>
+      <text>已完成</text>
     </view>
   </view>
 
@@ -63,7 +60,7 @@
 
   <view class="section-head">
     <view><text class="section-kicker">沿途任务</text><text class="section-title">3 个健康点位</text></view>
-    <text class="demo-link" bindtap="demoComplete">演示完赛</text>
+    <text class="demo-link">按顺序完成</text>
   </view>
 
   <view class="station-list">
@@ -91,7 +88,7 @@
       <text class="sheet-title">点位 {{currentStation.id}} · {{currentStation.title}}</text>
       <text class="sheet-copy">已到达{{currentStation.location}}。将手机顶部靠近 NFC 感应区，保持 1–2 秒。</text>
       <button class="primary-button" loading="{{nfcLoading}}" bindtap="scanNfc">{{nfcLoading ? '等待 NFC 标签...' : '开始 NFC 感应'}}</button>
-      <view class="nfc-links"><text class="sheet-link" bindtap="simulateNfc">没有标签？模拟碰一碰</text><text class="sheet-link" bindtap="manualCheckIn">输入点位码</text></view>
+      <text wx:if="{{showSimulation}}" class="sheet-link" bindtap="simulateNfc">开发环境：模拟碰一碰</text>
     </view>
   </view>
 </view>

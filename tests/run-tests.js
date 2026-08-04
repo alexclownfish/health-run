@@ -60,7 +60,7 @@ run('progress state normalizes and caps safely', () => {
   assert.equal(store.deriveStats({ completed: 1 }).points, 1)
 })
 
-run('progress persistence prevents skipped stations', () => {
+run('strict station workflow rejects every skipped step', () => {
   const store = require(path.join(miniRoot, 'utils', 'progress.js'))
   const storage = {}
   global.wx = {
@@ -68,16 +68,55 @@ run('progress persistence prevents skipped stations', () => {
     setStorageSync: (key, value) => { storage[key] = value }
   }
   store.resetProgress()
-  store.completeStation(1, 'photo-b.jpg')
+  store.checkInStation(1)
+  store.startAction(0)
+  store.completeStation(0, 'photo-a.jpg')
   assert.equal(store.readProgress().completed, 0)
-  assert.equal(store.readProgress().photos['1'], undefined)
+  store.checkInStation(0)
+  store.completeStation(0, 'photo-a.jpg')
+  assert.equal(store.readProgress().completed, 0)
+  store.startAction(0)
+  store.completeStation(0, 'photo-a.jpg')
+  assert.equal(store.readProgress().completed, 0)
+  store.completeAction(0)
+  store.completeStation(0, '')
+  assert.equal(store.readProgress().completed, 0)
   store.completeStation(0, 'photo-a.jpg')
   assert.equal(store.readProgress().completed, 1)
+
+  store.checkInStation(1)
+  store.startAction(1)
+  store.completeAction(1)
   store.completeStation(1, 'photo-b.jpg')
   assert.equal(store.readProgress().completed, 2)
+  store.checkInStation(2)
+  store.startAction(2)
+  store.completeAction(2)
   store.completeStation(2, 'photo-c.jpg')
   assert.equal(store.readProgress().completed, 3)
   assert.ok(store.readProgress().completedAt > 0)
+  assert.equal(store.readProgress().history.length, 3)
+})
+
+run('expired NFC check-ins cannot start an action', () => {
+  const store = require(path.join(miniRoot, 'utils', 'progress.js'))
+  assert.equal(store.hasValidCheckIn({ checkins: { 0: { at: Date.now() - 21 * 60 * 1000 } } }, 0), false)
+  assert.equal(store.hasValidCheckIn({ checkins: { 0: { at: Date.now() } } }, 0), true)
+})
+
+run('user profile storage normalizes WeChat data', () => {
+  const userStore = require(path.join(miniRoot, 'utils', 'user.js'))
+  const user = userStore.saveUser({ nickName: '  小跑  ', avatarUrl: 'wxfile://avatar.png' })
+  assert.equal(user.nickName, '小跑')
+  assert.equal(userStore.readUser().avatarUrl, 'wxfile://avatar.png')
+})
+
+run('calendar uses real month boundaries and activity dates', () => {
+  const format = require(path.join(miniRoot, 'utils', 'format.js'))
+  const calendar = format.getMonthGrid(2026, 7, ['2026-08-05'])
+  assert.equal(calendar.monthLabel, '2026.08')
+  assert.equal(calendar.cells.find((cell) => cell.day === 5).active, true)
+  assert.equal(calendar.cells.length % 7, 0)
 })
 
 run('wxml has balanced view/block tags', () => {

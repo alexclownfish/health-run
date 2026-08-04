@@ -1,7 +1,8 @@
 .route-page { padding-top: 18rpx; }
 .route-heading { display: flex; align-items: center; justify-content: space-between; }
 .route-heading .page-title { display: block; }
-.profile-dot { width: 70rpx; height: 70rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--deep); background: var(--mint); font-size: 24rpx; font-weight: 800; }
+.profile-dot { overflow: hidden; width: 70rpx; height: 70rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--deep); background: var(--mint); font-size: 24rpx; font-weight: 800; }
+.profile-dot image { width: 100%; height: 100%; }
 .weather { display: grid; grid-template-columns: 72rpx 1fr auto; gap: 18rpx; align-items: center; margin-top: 26rpx; padding: 18rpx 22rpx; }
 .weather-symbol { width: 68rpx; height: 68rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #df8a25; background: var(--cream); font-size: 35rpx; }
 .weather-copy text { display: block; }
