@@ -1,0 +1,42 @@
+<view class="page action-page with-fixed-action">
+  <view class="checkpoint-bar">
+    <view><view class="status-dot"></view><text class="mono">PATCH_0{{station.id}} / NFC CONNECTED</text></view>
+    <text>✓</text>
+  </view>
+
+  <view class="motion-card">
+    <view class="motion-orbit orbit-one"></view>
+    <view class="motion-orbit orbit-two"></view>
+    <view class="motion-person motion-{{stationIndex}}">
+      <view class="head"></view>
+      <view class="neck"></view>
+      <view class="body"></view>
+      <view class="arm left-arm"><view class="hand"></view></view>
+      <view class="arm right-arm"><view class="hand"></view></view>
+    </view>
+    <view class="motion-label">↑ {{station.motion}}</view>
+  </view>
+
+  <view class="instruction">
+    <text class="eyebrow">0{{station.id}} / 保持站立</text>
+    <text class="instruction-title">{{station.heading}}</text>
+    <text class="instruction-copy">{{station.instruction}}</text>
+  </view>
+
+  <view class="timer-card card">
+    <text class="timer-text mono">{{timerText}}</text>
+    <button class="timer-button {{timerComplete ? 'complete' : ''}}" bindtap="toggleTimer">
+      <text>{{timerComplete ? '✓' : timerRunning ? 'Ⅱ' : '▷'}}</text>
+      <text>{{timerComplete ? '重新计时' : timerRunning ? '暂停' : '开始计时'}}</text>
+    </button>
+  </view>
+
+  <view class="safety-card">
+    <view class="safety-icon">♢</view>
+    <view><text>安全提示</text><text>{{station.safety}}</text></view>
+  </view>
+
+  <view class="fixed-action">
+    <button class="primary-button" bindtap="goUpload"><text>动作完成，去拍照</text><text class="arrow">⌁</text></button>
+  </view>
+</view>

@@ -1,0 +1,7 @@
+{
+  "name": "health-run",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run-tests.js"
+  }
+}

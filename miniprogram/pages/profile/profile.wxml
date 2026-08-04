@@ -1,0 +1,38 @@
+<view class="page profile-page">
+  <view class="page-heading"><text class="eyebrow">MY PATCHWALK</text><text class="page-title">个人中心</text></view>
+
+  <view class="profile-hero">
+    <view class="avatar">林</view>
+    <view class="profile-copy"><text>{{user.name}}</text><text>{{user.department}} · 活力探索者</text><text class="streak">连续打卡 6 天</text></view>
+    <text class="chevron">›</text>
+  </view>
+
+  <view class="level-card card">
+    <view class="level-head"><text>当前等级</text><text class="mono">LV. 0{{user.level}} 绿道行者</text></view>
+    <view class="level-track"><view></view></view>
+    <view class="level-foot"><text>{{user.energy}} / 800 活力值</text><text>距升级还差 120</text></view>
+  </view>
+
+  <view class="section-head"><view><text class="section-kicker">BADGES</text><text class="section-title">我的徽章</text></view><text class="section-side">5 枚</text></view>
+  <view class="badge-grid">
+    <view><view class="badge lime">♙</view><text>初次出发</text></view>
+    <view><view class="badge blue">ϟ</view><text>能量满格</text></view>
+    <view><view class="badge coral">☀</view><text>晨光同行</text></view>
+    <view><view class="badge locked">□</view><text>等待解锁</text></view>
+  </view>
+
+  <view class="settings-list card">
+    <view bindtap="toggleReminder">
+      <view class="setting-icon">♢</view><text>活动提醒</text><text>{{reminderEnabled ? '工作日 12:15' : '已关闭'}}</text><text class="chevron">›</text>
+    </view>
+    <view bindtap="showPrivacy">
+      <view class="setting-icon">◇</view><text>隐私与照片</text><text>仅自己可见</text><text class="chevron">›</text>
+    </view>
+    <view bindtap="resetProgress">
+      <view class="setting-icon">↶</view><text>重置演示进度</text><text>{{completed}} / 3 点位</text><text class="chevron">›</text>
+    </view>
+    <view bindtap="showPlaceholder">
+      <view class="setting-icon">?</view><text>帮助与反馈</text><text></text><text class="chevron">›</text>
+    </view>
+  </view>
+</view>

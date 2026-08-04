@@ -1,0 +1,97 @@
+<view class="page route-page with-fixed-action">
+  <view class="route-heading">
+    <view>
+      <text class="eyebrow">PATCHWALK / 轻跑计划</text>
+      <text class="page-title">午间漫步</text>
+    </view>
+    <view class="profile-dot">林</view>
+  </view>
+
+  <view class="weather card">
+    <view class="weather-symbol">☀</view>
+    <view class="weather-copy">
+      <text>适合轻运动</text>
+      <text>多云 · 26°C · 微风</text>
+    </view>
+    <view class="weather-score">
+      <text>82</text>
+      <text>状态分</text>
+    </view>
+  </view>
+
+  <view class="challenge">
+    <view class="challenge-ring ring-one"></view>
+    <view class="challenge-ring ring-two"></view>
+    <view class="challenge-copy">
+      <text class="challenge-code mono">TODAY / ROUTE 01</text>
+      <text class="challenge-title">1 公里闭环健康漫步</text>
+      <text class="challenge-desc">穿过园区绿道，完成 3 次身体唤醒</text>
+    </view>
+    <view class="challenge-time"><text>15–20</text><text>分钟</text></view>
+  </view>
+
+  <view class="route-card card">
+    <view class="route-card-head">
+      <view>
+        <text class="section-kicker">今日路线</text>
+        <text class="route-card-title">{{progressTitle}}</text>
+      </view>
+      <text class="section-side">{{completed}} / 3 点位</text>
+    </view>
+
+    <view class="map">
+      <view class="river river-one"></view>
+      <view class="river river-two"></view>
+      <view class="road road-one"></view>
+      <view class="road road-two"></view>
+      <view class="road road-three"></view>
+      <view class="route-segment segment-one"></view>
+      <view class="route-segment segment-two"></view>
+      <view class="route-segment segment-three"></view>
+      <view class="route-segment segment-four"></view>
+      <view class="route-segment segment-five"></view>
+      <view class="map-label label-office">公司大楼</view>
+      <view class="map-label label-greenway">溪畔绿道</view>
+      <view class="map-marker marker-start">S</view>
+      <view class="map-marker marker-1 {{completed > 0 ? 'done' : 'current'}}">{{completed > 0 ? '✓' : '1'}}</view>
+      <view class="map-marker marker-2 {{completed > 1 ? 'done' : completed == 1 ? 'current' : ''}}">{{completed > 1 ? '✓' : '2'}}</view>
+      <view class="map-marker marker-3 {{completed > 2 ? 'done' : completed == 2 ? 'current' : ''}}">{{completed > 2 ? '✓' : '3'}}</view>
+      <view class="compass">△</view>
+    </view>
+    <view class="map-hint"><text class="scan-icon">⌗</text><text>到达点位后，用手机轻触 NFC 标牌</text></view>
+  </view>
+
+  <view class="section-head">
+    <view><text class="section-kicker">沿途任务</text><text class="section-title">3 个健康点位</text></view>
+    <text class="demo-link" bindtap="demoComplete">演示完赛</text>
+  </view>
+
+  <view class="station-list">
+    <view wx:for="{{stations}}" wx:key="id" class="station-card card {{item.done ? 'done' : ''}} {{item.locked ? 'locked' : ''}}" data-index="{{index}}" bindtap="handleStationTap">
+      <view class="station-number">{{item.done ? '✓' : item.number}}</view>
+      <view class="station-copy"><text>{{item.title}}</text><text>{{item.location}} · {{item.tag}}</text></view>
+      <view class="station-meta"><text>{{item.status}}</text><text>{{item.distance}}</text></view>
+    </view>
+  </view>
+
+  <view class="fixed-action">
+    <button class="primary-button" bindtap="handleStart"><text>{{ctaLabel}}</text><text class="arrow">↗</text></button>
+  </view>
+
+  <view wx:if="{{nfcVisible}}" class="sheet-mask" bindtap="closeNfc">
+    <view class="bottom-sheet" catchtap="preventClose">
+      <view class="sheet-handle"></view>
+      <view class="nfc-visual">
+        <view class="nfc-phone"><view class="speaker"></view><text>手机</text><view class="nfc-chip">NFC</view></view>
+        <view class="nfc-wave wave-one"></view>
+        <view class="nfc-wave wave-two"></view>
+        <view class="nfc-wave wave-three"></view>
+      </view>
+      <text class="eyebrow">NFC TOUCH / CHECK IN</text>
+      <text class="sheet-title">点位 {{currentStation.id}} · {{currentStation.title}}</text>
+      <text class="sheet-copy">已到达{{currentStation.location}}。将手机顶部靠近 NFC 感应区，保持 1–2 秒。</text>
+      <button class="primary-button" loading="{{nfcLoading}}" bindtap="scanNfc">{{nfcLoading ? '等待 NFC 标签...' : '开始 NFC 感应'}}</button>
+      <view class="nfc-links"><text class="sheet-link" bindtap="simulateNfc">没有标签？模拟碰一碰</text><text class="sheet-link" bindtap="manualCheckIn">输入点位码</text></view>
+    </view>
+  </view>
+</view>

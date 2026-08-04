@@ -1,0 +1,37 @@
+<view class="page certificate-page">
+  <view wx:if="{{certificateReady}}" class="certificate card">
+    <view class="certificate-top">
+      <view class="decor decor-one"></view><view class="decor decor-two"></view>
+      <text class="certificate-code mono">PATCH COMPLETE / RELEASE</text>
+      <text class="certificate-title">午间漫步 · 健康同行</text>
+      <text class="certificate-subtitle">完成约 1 公里闭环健康路线</text>
+      <view class="complete-seal">✓</view>
+    </view>
+    <view class="certificate-body">
+      <text class="certificate-id mono">PATCH-WALK-{{certificateId}}</text>
+      <view class="score"><text>3/3</text><text>打卡完成</text></view>
+      <view class="certificate-stations">
+        <view wx:for="{{stations}}" wx:key="id">
+          <text class="station-dot">{{item.id}}</text>
+          <text>{{item.title}} · {{item.location}}</text>
+          <text>完成</text>
+        </view>
+      </view>
+      <text class="certificate-note">回到公司大楼 · 能量已释放</text>
+      <view class="certificate-meta"><text>完成时间 <text>{{completedTime}}</text></text><text>路程 <text>1.02 km</text></text></view>
+      <view class="certificate-footer mono">HEALTH STATUS: RELEASED ✓</view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-certificate card">
+    <view class="empty-icon">⌁</view>
+    <text>凭证还在路上</text>
+    <text>完成 3 个健康点位后，即可生成专属完赛凭证。</text>
+  </view>
+
+  <view class="certificate-actions" wx:if="{{certificateReady}}">
+    <button class="secondary-button" bindtap="saveCertificate"><text>⇩</text><text>保存凭证</text></button>
+    <button class="secondary-button" open-type="share"><text>⌁</text><text>分享给同事</text></button>
+  </view>
+  <button class="primary-button back-home" bindtap="backHome"><text>返回活动首页</text><text class="arrow">⌂</text></button>
+</view>

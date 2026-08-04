@@ -1,0 +1,53 @@
+<view class="page upload-page with-fixed-action">
+  <view class="upload-intro">
+    <text class="eyebrow">ACTION PROOF / 记录当下</text>
+    <text class="upload-title">完成动作，并拍一张照片</text>
+    <text class="upload-copy">支持单人自拍，也可以邀请同伴一起入镜。</text>
+  </view>
+
+  <view class="photo-stage {{photoPath ? 'has-photo' : ''}}" bindtap="choosePhoto">
+    <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill" bindlongpress="previewPhoto"></image>
+    <block wx:else>
+      <view class="photo-sun"></view>
+      <view class="photo-mountain mountain-one"></view>
+      <view class="photo-mountain mountain-two"></view>
+      <view class="photo-person"><view class="photo-head"></view><view class="photo-body"></view><view class="photo-arm left"></view><view class="photo-arm right"></view></view>
+      <view class="camera-prompt">
+        <text class="camera-icon">▣</text>
+        <view><text>拍照或从相册选择</text><text>JPG / PNG，单张不超过 10MB</text></view>
+      </view>
+    </block>
+    <view wx:if="{{photoPath}}" class="change-photo">点击更换照片 · 长按预览</view>
+  </view>
+
+  <view class="section-head tips-head">
+    <view><text class="section-kicker">PHOTO GUIDE</text><text class="section-title">拍照小贴士</text></view>
+    <text class="section-side">{{station.id}} / 3</text>
+  </view>
+  <view class="photo-tips">
+    <view class="card"><text class="tip-symbol">⌗</text><text>动作清晰</text><text>人物完整</text></view>
+    <view class="card"><text class="tip-symbol">♙</text><text>可邀请</text><text>同伴合照</text></view>
+    <view class="card"><text class="tip-symbol">◉</text><text>避开工牌</text><text>敏感信息</text></view>
+  </view>
+
+  <view class="privacy-row" bindtap="togglePrivacy">
+    <view class="checkbox {{privacyAccepted ? 'checked' : ''}}">{{privacyAccepted ? '✓' : ''}}</view>
+    <text>仅用于本次健康打卡记录，不会公开展示</text>
+  </view>
+
+  <view class="fixed-action">
+    <button class="primary-button" loading="{{submitting}}" bindtap="submitPoint"><text>{{submitting ? '上传中...' : '上传并完成点位'}}</text><text class="arrow">↥</text></button>
+  </view>
+
+  <view wx:if="{{successVisible}}" class="sheet-mask">
+    <view class="bottom-sheet success-sheet" catchtap="preventClose">
+      <view class="sheet-handle"></view>
+      <view class="success-mark">✓</view>
+      <text class="eyebrow">POINT CLEARED</text>
+      <text class="sheet-title">点位 {{station.id}} 已完成</text>
+      <text class="sheet-copy">{{station.success}}</text>
+      <view class="success-track"><view style="width: {{successProgress}}%;"></view></view>
+      <button class="primary-button" bindtap="continueRoute"><text>{{continueLabel}}</text><text class="arrow">→</text></button>
+    </view>
+  </view>
+</view>
