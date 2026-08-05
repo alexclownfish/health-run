@@ -29,3 +29,4 @@
 .empty-certificate text { display: block; }
 .empty-certificate > text:nth-child(2) { font-size: 35rpx; font-weight: 800; }
 .empty-certificate > text:last-child { margin-top: 13rpx; color: var(--muted); font-size: 21rpx; line-height: 1.7; }
+.certificate-canvas { position: fixed; z-index: -1; left: -2000rpx; top: 0; width: 750rpx; height: 1100rpx; opacity: 0; pointer-events: none; }

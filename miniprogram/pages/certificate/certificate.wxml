@@ -31,8 +31,10 @@
   </view>
 
   <view class="certificate-actions" wx:if="{{certificateReady}}">
-    <button class="secondary-button" bindtap="saveCertificate"><text>⇩</text><text>保存凭证</text></button>
+    <button class="secondary-button" loading="{{savingCertificate}}" disabled="{{savingCertificate}}" bindtap="saveCertificate"><text wx:if="{{!savingCertificate}}">⇩</text><text>{{savingCertificate ? '正在生成' : '保存凭证'}}</text></button>
     <button class="secondary-button" open-type="share"><text>⌁</text><text>分享给同事</text></button>
   </view>
   <button class="primary-button back-home" bindtap="backHome"><text>返回活动首页</text><text class="arrow">⌂</text></button>
+
+  <canvas type="2d" id="certificateCanvas" class="certificate-canvas"></canvas>
 </view>

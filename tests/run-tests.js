@@ -161,6 +161,16 @@ run('photo completion reports cloud or local storage to the user', () => {
   assert.match(uploadTemplate, /\{\{storageNotice\}\}/)
 })
 
+run('completion certificate renders and saves a local album image', () => {
+  const certificateScript = fs.readFileSync(path.join(miniRoot, 'pages', 'certificate', 'certificate.js'), 'utf8')
+  const certificateTemplate = fs.readFileSync(path.join(miniRoot, 'pages', 'certificate', 'certificate.wxml'), 'utf8')
+  assert.match(certificateScript, /canvasToTempFilePath/)
+  assert.match(certificateScript, /saveImageToPhotosAlbum/)
+  assert.match(certificateScript, /wx\.openSetting/)
+  assert.match(certificateTemplate, /id="certificateCanvas"/)
+  assert.match(certificateTemplate, /savingCertificate/)
+})
+
 run('user profile storage normalizes WeChat data', () => {
   const userStore = require(path.join(miniRoot, 'utils', 'user.js'))
   const user = userStore.saveUser({ nickName: '  小跑  ', avatarUrl: 'wxfile://avatar.png' })
