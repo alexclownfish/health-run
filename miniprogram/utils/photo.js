@@ -1,8 +1,4 @@
-function getEnvVersion() {
-  if (typeof wx.getAccountInfoSync !== 'function') return 'release'
-  const account = wx.getAccountInfoSync()
-  return account && account.miniProgram ? account.miniProgram.envVersion : 'release'
-}
+const config = require('./config')
 
 function saveLocal(filePath) {
   return new Promise((resolve, reject) => {
@@ -14,13 +10,28 @@ function saveLocal(filePath) {
   })
 }
 
+function getErrorCode(error) {
+  if (!error) return 'UNKNOWN'
+  if (typeof error.errCode !== 'undefined') return String(error.errCode)
+  const message = error.errMsg || error.message || ''
+  const match = String(message).match(/(?:errCode|code)[:=\s]+(-?\d+)/i)
+  return match ? match[1] : 'UNKNOWN'
+}
+
+function withUploadContext(error) {
+  const wrapped = new Error(error && (error.errMsg || error.message) || 'PHOTO_UPLOAD_FAILED')
+  wrapped.code = getErrorCode(error)
+  return wrapped
+}
+
 function uploadCheckInPhoto(filePath, stationIndex) {
   if (!filePath) return Promise.reject(new Error('PHOTO_REQUIRED'))
   const extension = filePath.includes('.') ? filePath.split('.').pop().toLowerCase() : 'jpg'
   const cloudPath = `health-run/route-01/station-${Number(stationIndex) + 1}/${Date.now()}.${extension}`
-  if (wx.cloud && typeof wx.cloud.uploadFile === 'function') {
+  if (config.cloudEnvId && wx.cloud && typeof wx.cloud.uploadFile === 'function') {
     return new Promise((resolve, reject) => {
       wx.cloud.uploadFile({
+        config: { env: config.cloudEnvId },
         cloudPath,
         filePath,
         success: (result) => {
@@ -28,14 +39,14 @@ function uploadCheckInPhoto(filePath, stationIndex) {
           else reject(new Error('CLOUD_FILE_ID_MISSING'))
         },
         fail: (error) => {
-          if (getEnvVersion() === 'develop') saveLocal(filePath).then(resolve).catch(reject)
-          else reject(error)
+          if (config.allowLocalPhotoFallback) saveLocal(filePath).then(resolve).catch((localError) => reject(withUploadContext(localError)))
+          else reject(withUploadContext(error))
         }
       })
     })
   }
-  if (getEnvVersion() === 'develop') return saveLocal(filePath)
-  return Promise.reject(new Error('CLOUD_UNAVAILABLE'))
+  if (config.allowLocalPhotoFallback) return saveLocal(filePath)
+  return Promise.reject(withUploadContext(new Error('CLOUD_ENV_NOT_CONFIGURED')))
 }
 
-module.exports = { getEnvVersion, saveLocal, uploadCheckInPhoto }
+module.exports = { getErrorCode, saveLocal, uploadCheckInPhoto }

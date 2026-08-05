@@ -89,12 +89,13 @@ Page({
       })
       wx.vibrateShort({ type: 'medium' })
       })
-      .catch(() => {
+      .catch((error) => {
         this.setData({ submitting: false })
         wx.vibrateShort({ type: 'heavy' })
+        const errorCode = error && error.code && error.code !== 'UNKNOWN' ? `\n错误码：${error.code}` : ''
         wx.showModal({
           title: '照片上传失败',
-          content: '请检查网络或云开发环境后重试。照片未上传成功，本点位不会解锁。',
+          content: `请检查网络、存储空间或云开发配置后重试。照片未保存成功，本点位不会解锁。${errorCode}`,
           showCancel: false,
           confirmColor: '#005D46'
         })

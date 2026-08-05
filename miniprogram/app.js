@@ -1,5 +1,6 @@
 const progress = require('./utils/progress')
 const userStore = require('./utils/user')
+const config = require('./utils/config')
 
 App({
   globalData: {
@@ -10,6 +11,8 @@ App({
   onLaunch() {
     progress.ensureProgress()
     this.globalData.user = userStore.readUser()
-    if (wx.cloud && typeof wx.cloud.init === 'function') wx.cloud.init({ traceUser: true })
+    if (config.cloudEnvId && wx.cloud && typeof wx.cloud.init === 'function') {
+      wx.cloud.init({ env: config.cloudEnvId, traceUser: true })
+    }
   }
 })

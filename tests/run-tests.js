@@ -140,6 +140,17 @@ run('online NFC skip is an explicit temporary feature flag', () => {
   assert.match(routeTemplate, /动作与照片上传仍需完成/)
 })
 
+run('test-account photo fallback and production cloud config are explicit', () => {
+  const config = require(path.join(miniRoot, 'utils', 'config.js'))
+  const appScript = fs.readFileSync(path.join(miniRoot, 'app.js'), 'utf8')
+  const photoScript = fs.readFileSync(path.join(miniRoot, 'utils', 'photo.js'), 'utf8')
+  assert.equal(config.allowLocalPhotoFallback, true)
+  assert.equal(config.cloudEnvId, '')
+  assert.match(appScript, /env: config\.cloudEnvId/)
+  assert.match(photoScript, /config\.allowLocalPhotoFallback/)
+  assert.match(photoScript, /CLOUD_ENV_NOT_CONFIGURED/)
+})
+
 run('user profile storage normalizes WeChat data', () => {
   const userStore = require(path.join(miniRoot, 'utils', 'user.js'))
   const user = userStore.saveUser({ nickName: '  小跑  ', avatarUrl: 'wxfile://avatar.png' })
