@@ -12,6 +12,7 @@ Page({
     successVisible: false,
     completed: 0,
     successProgress: 0,
+    storageNotice: '',
     continueLabel: '查看下一站'
   },
 
@@ -74,6 +75,7 @@ Page({
     this.setData({ submitting: true })
     photoService.uploadCheckInPhoto(this.data.photoPath, this.data.stationIndex)
       .then((savedPath) => {
+      const savedLocally = typeof savedPath === 'string' && savedPath.startsWith('local://')
       const progress = progressStore.completeStation(this.data.stationIndex, savedPath)
       if (progress.completed <= this.data.stationIndex) {
         this.setData({ submitting: false })
@@ -85,6 +87,7 @@ Page({
         successVisible: true,
         completed: progress.completed,
         successProgress: Math.round(progress.completed / 3 * 100),
+        storageNotice: savedLocally ? '云端暂不可用，照片已保存到本机' : '照片已保存至微信云端',
         continueLabel: progress.completed === 3 ? '生成完赛凭证' : '查看下一站'
       })
       wx.vibrateShort({ type: 'medium' })

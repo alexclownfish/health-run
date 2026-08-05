@@ -28,5 +28,6 @@
 .checkbox { width: 36rpx; height: 36rpx; display: flex; align-items: center; justify-content: center; border: 2rpx solid var(--green); border-radius: 8rpx; color: #fff; font-size: 20rpx; }
 .checkbox.checked { background: var(--green); }
 .success-mark { width: 128rpx; height: 128rpx; display: flex; align-items: center; justify-content: center; margin: 8rpx auto 27rpx; border-radius: 50%; color: #fff; background: var(--green); box-shadow: 0 0 0 19rpx var(--mint); font-size: 64rpx; font-weight: 700; }
+.storage-notice { display: block; margin: -14rpx 0 24rpx; color: var(--green); font-size: 19rpx; font-weight: 600; }
 .success-track { overflow: hidden; height: 13rpx; margin: 0 0 30rpx; border-radius: 8rpx; background: #e4ebe7; }
 .success-track view { height: 100%; background: linear-gradient(90deg, var(--green), var(--lime)); transition: width .4s ease; }

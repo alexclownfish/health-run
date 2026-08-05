@@ -46,6 +46,7 @@
       <text class="eyebrow">POINT CLEARED</text>
       <text class="sheet-title">点位 {{station.id}} 已完成</text>
       <text class="sheet-copy">{{station.success}}</text>
+      <text class="storage-notice">{{storageNotice}}</text>
       <view class="success-track"><view style="width: {{successProgress}}%;"></view></view>
       <button class="primary-button" bindtap="continueRoute"><text>{{continueLabel}}</text><text class="arrow">→</text></button>
     </view>
