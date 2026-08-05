@@ -130,6 +130,16 @@ run('expired NFC check-ins cannot start an action', () => {
   assert.equal(store.hasValidCheckIn({ checkins: { 0: { at: Date.now() } } }, 0), true)
 })
 
+run('online NFC skip is an explicit temporary feature flag', () => {
+  const config = require(path.join(miniRoot, 'utils', 'config.js'))
+  const routeScript = fs.readFileSync(path.join(miniRoot, 'pages', 'route', 'route.js'), 'utf8')
+  const routeTemplate = fs.readFileSync(path.join(miniRoot, 'pages', 'route', 'route.wxml'), 'utf8')
+  assert.equal(config.allowNfcSkip, true)
+  assert.match(routeScript, /enterCurrentStation\('nfc-skip'\)/)
+  assert.match(routeTemplate, /暂时跳过 NFC（测试）/)
+  assert.match(routeTemplate, /动作与照片上传仍需完成/)
+})
+
 run('user profile storage normalizes WeChat data', () => {
   const userStore = require(path.join(miniRoot, 'utils', 'user.js'))
   const user = userStore.saveUser({ nickName: '  小跑  ', avatarUrl: 'wxfile://avatar.png' })

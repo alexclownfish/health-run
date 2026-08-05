@@ -70,7 +70,8 @@
       <text class="sheet-title">点位 {{currentStation.id}} · {{currentStation.title}}</text>
       <text class="sheet-copy">已到达{{currentStation.location}}。将手机顶部靠近 NFC 感应区，保持 1–2 秒。</text>
       <button class="primary-button" loading="{{nfcLoading}}" bindtap="scanNfc">{{nfcLoading ? '等待 NFC 标签...' : '开始 NFC 感应'}}</button>
-      <text wx:if="{{showSimulation}}" class="sheet-link" bindtap="simulateNfc">开发环境：模拟碰一碰</text>
+      <button wx:if="{{showNfcSkip}}" class="nfc-skip-button" disabled="{{nfcLoading}}" bindtap="skipNfc">暂时跳过 NFC（测试）</button>
+      <text wx:if="{{showNfcSkip}}" class="nfc-skip-note">仅跳过感应，动作与照片上传仍需完成</text>
     </view>
   </view>
 

@@ -50,3 +50,6 @@
 .wave-two { animation-delay: .4s; }.wave-three { animation-delay: .8s; }
 @keyframes wave { from { opacity: 1; transform: rotate(45deg) scale(.4); } to { opacity: 0; transform: rotate(45deg) scale(1.35); } }
 .nfc-links { display: flex; align-items: center; justify-content: center; gap: 35rpx; }
+.nfc-skip-button { min-height: 72rpx; margin: 18rpx 0 0; border: 1rpx solid var(--line); border-radius: 14rpx; color: var(--green); background: #fff; font-size: 22rpx; font-weight: 600; line-height: 70rpx; }
+.nfc-skip-button[disabled] { color: #9aaba4; background: #f1f4f2; }
+.nfc-skip-note { display: block; margin-top: 10rpx; color: var(--muted); font-size: 17rpx; }

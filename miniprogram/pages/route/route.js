@@ -2,6 +2,7 @@ const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
 const nfc = require('../../utils/nfc')
 const userStore = require('../../utils/user')
+const featureFlags = require('../../utils/config')
 const { getActivityContext } = require('../../utils/format')
 
 Page({
@@ -16,14 +17,11 @@ Page({
     user: userStore.defaultUser(),
     userInitial: '我',
     activity: getActivityContext(),
-    showSimulation: false,
+    showNfcSkip: featureFlags.allowNfcSkip,
     profileVisible: false
   },
 
   onLoad() {
-    const account = typeof wx.getAccountInfoSync === 'function' ? wx.getAccountInfoSync() : null
-    const envVersion = account && account.miniProgram ? account.miniProgram.envVersion : 'release'
-    this.setData({ showSimulation: envVersion === 'develop' })
     this.refreshProgress()
     const user = userStore.readUser()
     if (!userStore.isProfileComplete(user)) this.setData({ profileVisible: true })
@@ -156,11 +154,12 @@ Page({
       })
   },
 
-  simulateNfc() {
+  skipNfc() {
     if (this.data.nfcLoading) return
+    wx.vibrateShort({ type: 'light' })
     this.setData({ nfcLoading: true })
     setTimeout(() => {
-      this.enterCurrentStation('simulation')
+      this.enterCurrentStation('nfc-skip')
     }, 650)
   },
 
