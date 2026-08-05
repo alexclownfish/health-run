@@ -3,5 +3,5 @@ module.exports = {
   allowNfcSkip: true,
   // A station only completes after CloudBase returns a file ID.
   allowLocalPhotoFallback: false,
-  cloudEnvId: 'prod-d5g9ag4dk4dac399f'
+  cloudEnvId: 'cloudbase-d7gfg8vr06572506e'
 }

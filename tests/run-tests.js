@@ -146,7 +146,7 @@ run('production photo upload uses the configured CloudBase environment', () => {
   const appScript = fs.readFileSync(path.join(miniRoot, 'app.js'), 'utf8')
   const photoScript = fs.readFileSync(path.join(miniRoot, 'utils', 'photo.js'), 'utf8')
   assert.equal(config.allowLocalPhotoFallback, false)
-  assert.equal(config.cloudEnvId, 'prod-d5g9ag4dk4dac399f')
+  assert.equal(config.cloudEnvId, 'cloudbase-d7gfg8vr06572506e')
   assert.match(appScript, /env: config\.cloudEnvId/)
   assert.match(photoScript, /config\.allowLocalPhotoFallback/)
   assert.match(photoScript, /CLOUD_ENV_NOT_CONFIGURED/)
