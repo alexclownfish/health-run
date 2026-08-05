@@ -26,6 +26,7 @@ run('project config points to miniprogram root', () => {
   const config = readJson(path.join(root, 'project.config.json'))
   assert.equal(config.miniprogramRoot, 'miniprogram/')
   assert.equal(config.compileType, 'miniprogram')
+  assert.equal(config.appid, 'wx44b333d3d8cef506')
 })
 
 run('app page registry has every page asset', () => {
@@ -140,12 +141,12 @@ run('online NFC skip is an explicit temporary feature flag', () => {
   assert.match(routeTemplate, /动作与照片上传仍需完成/)
 })
 
-run('test-account photo fallback and production cloud config are explicit', () => {
+run('production photo upload uses the configured CloudBase environment', () => {
   const config = require(path.join(miniRoot, 'utils', 'config.js'))
   const appScript = fs.readFileSync(path.join(miniRoot, 'app.js'), 'utf8')
   const photoScript = fs.readFileSync(path.join(miniRoot, 'utils', 'photo.js'), 'utf8')
-  assert.equal(config.allowLocalPhotoFallback, true)
-  assert.equal(config.cloudEnvId, '')
+  assert.equal(config.allowLocalPhotoFallback, false)
+  assert.equal(config.cloudEnvId, 'prod-d5g9ag4dk4dac399f')
   assert.match(appScript, /env: config\.cloudEnvId/)
   assert.match(photoScript, /config\.allowLocalPhotoFallback/)
   assert.match(photoScript, /CLOUD_ENV_NOT_CONFIGURED/)

@@ -13,7 +13,7 @@
 
 路线首页 -> NFC 感应验证 -> 点击开始动作并完成计时 -> 必须拍照上传 -> 点位完成 -> 3/3 完赛凭证。当前线上版本临时保留 NFC 跳过入口用于测试；只跳过 NFC 读取，动作、照片上传和点位顺序仍严格校验。实体标签就绪后将 `utils/config.js` 中的 `allowNfcSkip` 改为 `false` 即可关闭。
 
-进度、NFC、动作状态和照片路径使用本地 storage 保存。`wx.chooseMedia` 已接入真实相机/相册入口。当前测试号无法使用微信云服务，因此 `utils/config.js` 中开启了 `allowLocalPhotoFallback`，发布版会将照片持久保存到当前设备后完成点位。换成已注册小程序后，应开通云开发、填写 `cloudEnvId`，并按需要关闭本地回退，此时照片通过 `wx.cloud.uploadFile` 上传成功后才会完成点位。头像与昵称使用微信授权控件，记录页日历基于系统日期动态生成。
+进度、NFC、动作状态和照片路径使用本地 storage 保存。`wx.chooseMedia` 已接入真实相机/相册入口。项目使用小程序 AppID `wx44b333d3d8cef506`，照片通过云环境 `prod-d5g9ag4dk4dac399f` 的对象存储上传；只有 `wx.cloud.uploadFile` 返回 `fileID` 后才会完成点位。该云环境归属 AppID `wxfb3be67ef56811f9`，需在云开发控制台确认已共享或关联给当前小程序 AppID。头像与昵称使用微信授权控件，记录页日历基于系统日期动态生成。
 
 ## 测试
 
