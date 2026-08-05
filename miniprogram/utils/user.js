@@ -26,4 +26,9 @@ function saveUser(value) {
   return next
 }
 
-module.exports = { KEY, defaultUser, normalizeUser, readUser, saveUser }
+function isProfileComplete(value) {
+  const user = normalizeUser(value)
+  return Boolean(user.nickName && user.avatarUrl)
+}
+
+module.exports = { KEY, defaultUser, normalizeUser, readUser, saveUser, isProfileComplete }

@@ -1,7 +1,7 @@
 <view class="page route-page with-fixed-action">
   <view class="route-heading">
     <view><text class="eyebrow">PATCHWALK / 轻跑计划</text><text class="page-title">{{activity.title}}</text></view>
-    <view class="profile-dot"><image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill"></image><text wx:else>{{userInitial}}</text></view>
+    <view class="profile-dot" bindtap="openProfileAuthorization"><image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill"></image><text wx:else>{{userInitial}}</text></view>
   </view>
 
   <view class="weather card">
@@ -36,25 +36,7 @@
       <text class="section-side">{{completed}} / 3 点位</text>
     </view>
 
-    <view class="map">
-      <view class="river river-one"></view>
-      <view class="river river-two"></view>
-      <view class="road road-one"></view>
-      <view class="road road-two"></view>
-      <view class="road road-three"></view>
-      <view class="route-segment segment-one"></view>
-      <view class="route-segment segment-two"></view>
-      <view class="route-segment segment-three"></view>
-      <view class="route-segment segment-four"></view>
-      <view class="route-segment segment-five"></view>
-      <view class="map-label label-office">公司大楼</view>
-      <view class="map-label label-greenway">溪畔绿道</view>
-      <view class="map-marker marker-start">S</view>
-      <view class="map-marker marker-1 {{completed > 0 ? 'done' : 'current'}}">{{completed > 0 ? '✓' : '1'}}</view>
-      <view class="map-marker marker-2 {{completed > 1 ? 'done' : completed == 1 ? 'current' : ''}}">{{completed > 1 ? '✓' : '2'}}</view>
-      <view class="map-marker marker-3 {{completed > 2 ? 'done' : completed == 2 ? 'current' : ''}}">{{completed > 2 ? '✓' : '3'}}</view>
-      <view class="compass">△</view>
-    </view>
+    <view class="map"><route-map completed="{{completed}}"></route-map></view>
     <view class="map-hint"><text class="scan-icon">⌗</text><text>到达点位后，用手机轻触 NFC 标牌</text></view>
   </view>
 
@@ -91,4 +73,6 @@
       <text wx:if="{{showSimulation}}" class="sheet-link" bindtap="simulateNfc">开发环境：模拟碰一碰</text>
     </view>
   </view>
+
+  <profile-auth visible="{{profileVisible}}" user="{{user}}" bindsave="saveAuthorizedProfile" bindclose="closeProfileAuthorization"></profile-auth>
 </view>

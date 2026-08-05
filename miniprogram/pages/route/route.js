@@ -16,7 +16,8 @@ Page({
     user: userStore.defaultUser(),
     userInitial: '我',
     activity: getActivityContext(),
-    showSimulation: false
+    showSimulation: false,
+    profileVisible: false
   },
 
   onLoad() {
@@ -24,6 +25,8 @@ Page({
     const envVersion = account && account.miniProgram ? account.miniProgram.envVersion : 'release'
     this.setData({ showSimulation: envVersion === 'develop' })
     this.refreshProgress()
+    const user = userStore.readUser()
+    if (!userStore.isProfileComplete(user)) this.setData({ profileVisible: true })
   },
 
   onShow() {
@@ -71,6 +74,25 @@ Page({
 
   getUserInitial(user) {
     return user && user.nickName ? user.nickName.charAt(0) : '我'
+  },
+
+  openProfileAuthorization() {
+    this.setData({ profileVisible: true })
+  },
+
+  closeProfileAuthorization() {
+    this.setData({ profileVisible: false })
+  },
+
+  saveAuthorizedProfile(event) {
+    const user = userStore.saveUser(event.detail && event.detail.user)
+    getApp().globalData.user = user
+    this.setData({
+      user,
+      userInitial: this.getUserInitial(user),
+      profileVisible: false
+    })
+    wx.showToast({ title: '微信资料已保存', icon: 'success' })
   },
 
   handleStart() {

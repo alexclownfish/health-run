@@ -7,7 +7,8 @@ Page({
     userInitial: '我',
     stats: progressStore.deriveStats(),
     completed: 0,
-    badges: []
+    badges: [],
+    profileVisible: false
   },
 
   onShow() {
@@ -31,43 +32,23 @@ Page({
     })
   },
 
-  onChooseAvatar(event) {
-    const avatarUrl = event.detail && event.detail.avatarUrl
-    if (!avatarUrl) return
-    const user = userStore.saveUser({ ...this.data.user, avatarUrl })
-    getApp().globalData.user = user
-    this.setData({ user })
-    wx.vibrateShort({ type: 'light' })
+  openProfileAuthorization() {
+    this.setData({ profileVisible: true })
   },
 
-  requestWeChatProfile() {
-    if (typeof wx.getUserProfile !== 'function') {
-      wx.showToast({ title: '请分别选择头像并填写昵称', icon: 'none' })
-      return
-    }
-    wx.getUserProfile({
-      desc: '用于展示健康打卡昵称和头像',
-      success: (result) => {
-        const info = result.userInfo || {}
-        const user = userStore.saveUser({
-          nickName: info.nickName || this.data.user.nickName,
-          avatarUrl: info.avatarUrl || this.data.user.avatarUrl
-        })
-        getApp().globalData.user = user
-        this.setData({ user, userInitial: user.nickName ? user.nickName.charAt(0) : '我' })
-        wx.vibrateShort({ type: 'light' })
-      },
-      fail: (error) => {
-        if (!error.errMsg || !error.errMsg.includes('cancel')) wx.showToast({ title: '微信资料授权失败', icon: 'none' })
-      }
+  closeProfileAuthorization() {
+    this.setData({ profileVisible: false })
+  },
+
+  saveAuthorizedProfile(event) {
+    const user = userStore.saveUser(event.detail && event.detail.user)
+    getApp().globalData.user = user
+    this.setData({
+      user,
+      userInitial: user.nickName ? user.nickName.charAt(0) : '我',
+      profileVisible: false
     })
-  },
-
-  onNicknameBlur(event) {
-    const nickName = event.detail && event.detail.value ? event.detail.value : ''
-    const user = userStore.saveUser({ ...this.data.user, nickName })
-    getApp().globalData.user = user
-    this.setData({ user, userInitial: user.nickName ? user.nickName.charAt(0) : '我' })
+    wx.showToast({ title: '微信资料已保存', icon: 'success' })
   },
 
   showPrivacy() {

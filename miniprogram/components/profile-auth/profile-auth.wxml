@@ -1,0 +1,22 @@
+<view wx:if="{{visible}}" class="auth-mask" bindtap="close">
+  <view class="auth-sheet" catchtap="preventClose">
+    <view class="sheet-handle"></view>
+    <view class="auth-heading">
+      <view><text class="auth-title">微信资料</text><text class="auth-copy">用于打卡记录和完赛凭证</text></view>
+      <button class="later-button" bindtap="close">稍后</button>
+    </view>
+
+    <view class="profile-fields">
+      <button class="avatar-choice" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image wx:if="{{draftAvatarUrl}}" src="{{draftAvatarUrl}}" mode="aspectFill"></image>
+        <view wx:else class="avatar-placeholder"><text>+</text><text>选头像</text></view>
+      </button>
+      <view class="nickname-field">
+        <text>昵称</text>
+        <input type="nickname" value="{{draftNickName}}" placeholder="使用微信昵称" maxlength="20" bindinput="onNicknameInput" />
+      </view>
+    </view>
+
+    <button class="confirm-button" bindtap="confirm">确认使用</button>
+  </view>
+</view>

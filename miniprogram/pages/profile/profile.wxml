@@ -1,9 +1,9 @@
 <view class="page profile-page">
   <view class="page-heading"><text class="eyebrow">MY PATCHWALK</text><text class="page-title">个人中心</text></view>
 
-  <view class="profile-hero">
-    <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"><image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill"></image><text wx:else>{{userInitial}}</text></button>
-    <view class="profile-copy"><text>{{user.nickName || '微信用户'}}</text><input class="nickname-input" type="nickname" value="{{user.nickName}}" placeholder="点击填写微信昵称" bindblur="onNicknameBlur" /><button class="sync-profile" bindtap="requestWeChatProfile">同步微信资料</button><text class="route-status">本次路线 {{completed}} / 3 点位</text></view>
+  <view class="profile-hero" bindtap="openProfileAuthorization">
+    <view class="profile-avatar"><image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill"></image><text wx:else>{{userInitial}}</text></view>
+    <view class="profile-copy"><text>{{user.nickName || '微信用户'}}</text><text class="profile-edit">{{user.nickName ? '查看或修改微信资料' : '点击授权微信头像和昵称'}}</text><text class="route-status">本次路线 {{completed}} / 3 点位</text></view>
     <text class="chevron">›</text>
   </view>
 
@@ -23,4 +23,6 @@
     <view bindtap="resetProgress"><view class="setting-icon">↶</view><text>重置本次路线</text><text>{{completed}} / 3 点位</text><text class="chevron">›</text></view>
     <view bindtap="showHelp"><view class="setting-icon">?</view><text>打卡流程说明</text><text></text><text class="chevron">›</text></view>
   </view>
+
+  <profile-auth visible="{{profileVisible}}" user="{{user}}" bindsave="saveAuthorizedProfile" bindclose="closeProfileAuthorization"></profile-auth>
 </view>

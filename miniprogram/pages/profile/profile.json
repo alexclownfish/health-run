@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "个人中心",
-  "backgroundColor": "#F4F7F2"
+  "backgroundColor": "#F4F7F2",
+  "usingComponents": {
+    "profile-auth": "/components/profile-auth/profile-auth"
+  }
 }

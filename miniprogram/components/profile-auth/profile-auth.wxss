@@ -1,0 +1,20 @@
+:host { display: block; }
+.auth-mask { position: fixed; z-index: 100; inset: 0; background: rgba(5,24,18,.52); }
+.auth-sheet { position: fixed; right: 0; bottom: 0; left: 0; padding: 20rpx 34rpx calc(24rpx + env(safe-area-inset-bottom)); border-radius: 30rpx 30rpx 0 0; background: #fff; animation: auth-up .25s ease-out; }
+@keyframes auth-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-handle { width: 72rpx; height: 7rpx; margin: 0 auto 20rpx; border-radius: 8rpx; background: #d7e2db; }
+.auth-heading { display: flex; align-items: center; justify-content: space-between; }
+.auth-title { display: block; color: #102d25; font-size: 32rpx; font-weight: 800; }
+.auth-copy { display: block; margin-top: 5rpx; color: #6c7e76; font-size: 18rpx; }
+.avatar-choice::after, .confirm-button::after, .later-button::after { border: 0; }
+.profile-fields { display: flex; align-items: center; gap: 20rpx; margin-top: 20rpx; padding: 17rpx 20rpx; border: 1rpx solid #d7e2db; border-radius: 14rpx; background: #f4f7f2; text-align: left; }
+.avatar-choice { position: relative; overflow: hidden; flex: 0 0 82rpx; width: 82rpx; min-width: 82rpx; max-width: 82rpx; height: 82rpx; min-height: 82rpx; margin: 0; padding: 0; border: 0; border-radius: 50%; color: #005d46; background: #e5f8c7; line-height: 1; }
+.avatar-choice image { width: 100%; height: 100%; }
+.avatar-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.avatar-placeholder text:first-child { font-size: 27rpx; line-height: 22rpx; }
+.avatar-placeholder text:last-child { margin-top: 6rpx; font-size: 15rpx; }
+.nickname-field { flex: 1; min-width: 0; }
+.nickname-field > text { color: #6c7e76; font-size: 18rpx; }
+.nickname-field input { width: 100%; height: 48rpx; margin-top: 2rpx; color: #102d25; font-size: 24rpx; font-weight: 700; }
+.confirm-button { min-height: 78rpx; margin: 16rpx 0 0; border: 0; border-radius: 14rpx; color: #fff; background: #005d46; font-size: 24rpx; font-weight: 700; line-height: 78rpx; }
+.later-button { width: auto; min-width: 0; min-height: 54rpx; margin: 0; padding: 0 8rpx; color: #6c7e76; background: transparent; font-size: 20rpx; line-height: 54rpx; }

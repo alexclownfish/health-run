@@ -6,6 +6,7 @@ const { execFileSync } = require('node:child_process')
 const root = path.resolve(__dirname, '..')
 const miniRoot = path.join(root, 'miniprogram')
 const pages = ['route', 'action', 'upload', 'certificate', 'records', 'profile']
+const components = ['route-map', 'profile-auth']
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'))
@@ -41,9 +42,34 @@ run('all app and page javascript parses', () => {
   const files = [
     path.join(miniRoot, 'app.js'),
     ...pages.map((page) => path.join(miniRoot, 'pages', page, `${page}.js`)),
+    ...components.map((component) => path.join(miniRoot, 'components', component, `${component}.js`)),
     ...fs.readdirSync(path.join(miniRoot, 'utils')).filter((file) => file.endsWith('.js')).map((file) => path.join(miniRoot, 'utils', file))
   ]
   for (const file of files) execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' })
+})
+
+run('route map and profile authorization components are registered', () => {
+  for (const component of components) {
+    for (const extension of ['js', 'json', 'wxml', 'wxss']) {
+      assert.ok(fs.existsSync(path.join(miniRoot, 'components', component, `${component}.${extension}`)), `${component}.${extension}`)
+    }
+    assert.equal(readJson(path.join(miniRoot, 'components', component, `${component}.json`)).component, true)
+  }
+  const route = readJson(path.join(miniRoot, 'pages', 'route', 'route.json'))
+  const profile = readJson(path.join(miniRoot, 'pages', 'profile', 'profile.json'))
+  assert.equal(route.usingComponents['route-map'], '/components/route-map/route-map')
+  assert.equal(route.usingComponents['profile-auth'], '/components/profile-auth/profile-auth')
+  assert.equal(profile.usingComponents['profile-auth'], '/components/profile-auth/profile-auth')
+})
+
+run('animated map keeps the UI route geometry and station order', () => {
+  const source = fs.readFileSync(path.join(miniRoot, 'components', 'route-map', 'route-map.js'), 'utf8')
+  assert.match(source, /\[194, 145\]/, 'start point')
+  assert.match(source, /\[139, 56\]/, 'station 1')
+  assert.match(source, /\[213, 72\]/, 'station 2')
+  assert.match(source, /\[329, 193\]/, 'station 3')
+  assert.match(source, /requestAnimationFrame/, 'animated route')
+  assert.match(source, /lineDashOffset/, 'flowing dashed path')
 })
 
 run('tab bar only points to existing pages', () => {
@@ -109,6 +135,8 @@ run('user profile storage normalizes WeChat data', () => {
   const user = userStore.saveUser({ nickName: '  小跑  ', avatarUrl: 'wxfile://avatar.png' })
   assert.equal(user.nickName, '小跑')
   assert.equal(userStore.readUser().avatarUrl, 'wxfile://avatar.png')
+  assert.equal(userStore.isProfileComplete(user), true)
+  assert.equal(userStore.isProfileComplete({ nickName: '小跑', avatarUrl: '' }), false)
 })
 
 run('calendar uses real month boundaries and activity dates', () => {
@@ -147,7 +175,11 @@ run('wxml event handlers exist in page scripts', () => {
 })
 
 run('wxss files have balanced braces', () => {
-  const files = [path.join(miniRoot, 'app.wxss'), ...pages.map((page) => path.join(miniRoot, 'pages', page, `${page}.wxss`))]
+  const files = [
+    path.join(miniRoot, 'app.wxss'),
+    ...pages.map((page) => path.join(miniRoot, 'pages', page, `${page}.wxss`)),
+    ...components.map((component) => path.join(miniRoot, 'components', component, `${component}.wxss`))
+  ]
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
     let depth = 0

@@ -1,0 +1,4 @@
+<view class="map-shell">
+  <canvas type="2d" id="routeMapCanvas" class="route-map-canvas"></canvas>
+  <view class="map-compass"><text>▲</text></view>
+</view>
