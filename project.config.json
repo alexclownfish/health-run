@@ -7,7 +7,7 @@
   "setting": {
     "useCompilerPlugins": false,
     "es6": true,
-    "enhance": true,
+    "enhance": false,
     "postcss": true,
     "minified": true,
     "coverView": true,
@@ -17,11 +17,29 @@
     "checkInvalidKey": true,
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
-    "compileHotReLoad": true,
-    "useIsolateContext": true,
-    "useMultiFrameRuntime": true,
-    "useApiHook": true,
-    "useApiHostProcess": true
+    "compileHotReLoad": false,
+    "useIsolateContext": false,
+    "useMultiFrameRuntime": false,
+    "useApiHook": false,
+    "useApiHostProcess": false
   },
-  "condition": {}
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "node_modules"
+      },
+      {
+        "type": "folder",
+        "value": "tests"
+      },
+      {
+        "type": "folder",
+        "value": "ui-prototype"
+      }
+    ],
+    "include": []
+  },
+  "condition": {},
+  "isGameTourist": false
 }
