@@ -104,7 +104,9 @@ Page({
   },
 
   handleStationTap(event) {
-    const index = Number(event.currentTarget.dataset.index)
+    const index = event.detail && event.detail.index !== undefined
+      ? Number(event.detail.index)
+      : Number(event.currentTarget.dataset.index)
     const station = this.data.stations[index]
     if (!station || station.locked) {
       wx.showToast({ title: '请按路线依次打卡', icon: 'none' })

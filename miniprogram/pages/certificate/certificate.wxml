@@ -4,7 +4,7 @@
       <view class="decor decor-one"></view><view class="decor decor-two"></view>
       <text class="certificate-code mono">PATCH COMPLETE / RELEASE</text>
       <text class="certificate-title">午间漫步 · 健康同行</text>
-      <text class="certificate-subtitle">完成约 1 公里闭环健康路线</text>
+      <text class="certificate-subtitle">完成约 1.56 公里实景健康路线</text>
       <view class="complete-seal">✓</view>
     </view>
     <view class="certificate-body">
@@ -18,8 +18,8 @@
           <text>完成</text>
         </view>
       </view>
-      <text class="certificate-note">回到公司大楼 · 能量已释放</text>
-      <view class="certificate-meta"><text>完成时间 <text>{{completedTime}}</text></text><text>路程 <text>1.02 km</text></text></view>
+      <text class="certificate-note">回到起点 · 能量已释放</text>
+      <view class="certificate-meta"><text>完成时间 <text>{{completedTime}}</text></text><text>路程 <text>1.56 km</text></text></view>
       <view class="certificate-footer mono">HEALTH STATUS: RELEASED ✓</view>
     </view>
   </view>

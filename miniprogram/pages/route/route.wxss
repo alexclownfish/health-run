@@ -27,7 +27,7 @@
 .route-card { overflow: hidden; margin-top: 22rpx; }
 .route-card-head { display: flex; align-items: flex-end; justify-content: space-between; padding: 25rpx 27rpx 20rpx; }
 .route-card-title { display: block; margin-top: 5rpx; font-size: 31rpx; font-weight: 800; }
-.map { overflow: hidden; height: 480rpx; margin: 0 18rpx; border-radius: 13rpx; background: #e2ece6; }
+.map { overflow: hidden; height: 380rpx; margin: 0 18rpx; border-radius: 13rpx; background: #e2ece6; }
 .map-hint { display: flex; align-items: center; justify-content: center; gap: 11rpx; padding: 22rpx; color: var(--muted); font-size: 19rpx; }
 .scan-icon { color: var(--green); font-size: 27rpx; }
 .demo-link { color: var(--green); font-size: 20rpx; }

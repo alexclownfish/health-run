@@ -1,5 +1,6 @@
 const KEY = 'patchwalk-progress-v2'
-const ROUTE_DISTANCE = [0.32, 0.61, 1.02]
+const routeData = require('./route')
+const ROUTE_DISTANCE = routeData.TASK_DISTANCE_KM
 
 function defaultProgress() {
   return {
@@ -122,7 +123,11 @@ function resetProgress() {
 
 function deriveStats(value) {
   const current = normalizeProgress(value)
-  const distance = current.completed === 0 ? 0 : ROUTE_DISTANCE[current.completed - 1]
+  const distance = current.completed === 0
+    ? 0
+    : current.completed === 3
+      ? routeData.TOTAL_DISTANCE_KM
+      : ROUTE_DISTANCE[current.completed - 1]
   const durationMinutes = current.startedAt
     ? Math.max(1, Math.ceil(((current.completedAt || Date.now()) - current.startedAt) / 60000))
     : 0

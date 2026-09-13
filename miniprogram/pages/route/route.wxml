@@ -21,8 +21,8 @@
     <view class="challenge-ring ring-two"></view>
     <view class="challenge-copy">
       <text class="challenge-code mono">TODAY / ROUTE 01</text>
-      <text class="challenge-title">1 公里闭环健康漫步</text>
-      <text class="challenge-desc">穿过园区绿道，完成 3 次身体唤醒</text>
+      <text class="challenge-title">1.56 公里实景健康漫步</text>
+      <text class="challenge-desc">沿真实轨迹行进，完成 3 次身体唤醒</text>
     </view>
     <view class="challenge-time"><text>15–20</text><text>分钟</text></view>
   </view>
@@ -36,8 +36,8 @@
       <text class="section-side">{{completed}} / 3 点位</text>
     </view>
 
-    <view class="map"><route-map completed="{{completed}}"></route-map></view>
-    <view class="map-hint"><text class="scan-icon">⌗</text><text>到达点位后，用手机轻触 NFC 标牌</text></view>
+    <view class="map"><route-map completed="{{completed}}" bindstationtap="handleStationTap"></route-map></view>
+    <view class="map-hint"><text class="scan-icon">⌗</text><text>实景地图 · 到达点位后轻触 NFC 标牌</text></view>
   </view>
 
   <view class="section-head">

@@ -125,7 +125,7 @@ Page({
     context.fillText('午间漫步 · 健康同行', 76, 158)
     context.fillStyle = '#c7eadd'
     context.font = '400 22px sans-serif'
-    context.fillText('完成约 1 公里闭环健康路线', 76, 208)
+    context.fillText('完成约 1.56 公里实景健康路线', 76, 208)
 
     context.beginPath()
     context.arc(625, 166, 52, 0, Math.PI * 2)
@@ -172,10 +172,10 @@ Page({
     context.textAlign = 'center'
     context.fillStyle = '#6c7e76'
     context.font = '400 19px sans-serif'
-    context.fillText('回到公司大楼 · 能量已释放', 375, 867)
+    context.fillText('回到起点 · 能量已释放', 375, 867)
     context.fillStyle = '#087d5c'
     context.font = '600 20px sans-serif'
-    context.fillText(`完成时间 ${this.data.completedTime}    ·    路程 1.02 km`, 375, 914)
+    context.fillText(`完成时间 ${this.data.completedTime}    ·    路程 1.56 km`, 375, 914)
 
     context.strokeStyle = '#d7e2db'
     context.lineWidth = 1

@@ -63,14 +63,20 @@ run('route map and profile authorization components are registered', () => {
   assert.equal(profile.usingComponents['profile-auth'], '/components/profile-auth/profile-auth')
 })
 
-run('animated map keeps the UI route geometry and station order', () => {
+run('native map uses the GPX route and station marker order', () => {
   const source = fs.readFileSync(path.join(miniRoot, 'components', 'route-map', 'route-map.js'), 'utf8')
-  assert.match(source, /\[194, 145\]/, 'start point')
-  assert.match(source, /\[139, 56\]/, 'station 1')
-  assert.match(source, /\[213, 72\]/, 'station 2')
-  assert.match(source, /\[329, 193\]/, 'station 3')
-  assert.match(source, /requestAnimationFrame/, 'animated route')
-  assert.match(source, /lineDashOffset/, 'flowing dashed path')
+  const template = fs.readFileSync(path.join(miniRoot, 'components', 'route-map', 'route-map.wxml'), 'utf8')
+  const route = require(path.join(miniRoot, 'utils', 'route.js'))
+  assert.equal(route.TRACK[0][0], 0, 'GPX start index')
+  assert.deepEqual(route.TASK_TRACK_INDEX, [135, 151, 159])
+  assert.deepEqual(route.getTaskMarkers().map((marker) => marker.sourceLabel), ['0', '3', '4'])
+  assert.equal(route.TRACK.length, 243, 'full GPX geometry')
+  assert.equal(route.getMapPoints().length, 243, 'converted GPX geometry')
+  assert.match(source, /getMapPoints/, 'GCJ-02 map points')
+  assert.match(source, /getMapMarkers/, 'native map markers')
+  assert.match(template, /<map/, 'native WeChat map')
+  assert.match(template, /polyline="\{\{polyline\}\}"/, 'GPX polyline binding')
+  assert.match(template, /show-location="\{\{false\}\}"/, 'location permission is disabled')
 })
 
 run('tab bar only points to existing pages', () => {
@@ -83,7 +89,7 @@ run('progress state normalizes and caps safely', () => {
   assert.equal(store.normalizeProgress({ completed: -3 }).completed, 0)
   assert.equal(store.normalizeProgress({ completed: 7 }).completed, 3)
   assert.equal(store.normalizeProgress({ completed: '2' }).completed, 2)
-  assert.equal(store.deriveStats({ completed: 3 }).distance, '1.02')
+  assert.equal(store.deriveStats({ completed: 3 }).distance, '1.56')
   assert.equal(store.deriveStats({ completed: 1 }).points, 1)
 })
 
