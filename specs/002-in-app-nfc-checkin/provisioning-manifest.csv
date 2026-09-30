@@ -1,0 +1,4 @@
+point,station_index,tag_id,uid_canonical,material_type,ndef_text,qr_id,qr_payload,nfc_readback_passed,qr_print_passed,mounted_read_passed,verified_at,verifier
+001,0,TAG-001-A,042BD5B2D32A81,NORMAL,HR1|001|TAG-001-A,QR-001-A,HRQ1|001|QR-001-A|ced81f9f7eb9a66ad9e5bcd07d732613,false,false,false,,
+002,1,TAG-002-A,0459D2B2D32A81,NORMAL,HR1|002|TAG-002-A,QR-002-A,HRQ1|002|QR-002-A|6a75420f4b73f6b13b73679a280c0a2e,false,false,false,,
+003,2,TAG-003-A,041DBEB2D32A81,NORMAL,HR1|003|TAG-003-A,QR-003-A,HRQ1|003|QR-003-A|f8f3d159740d3cf8104f3aa5618302e6,false,false,false,

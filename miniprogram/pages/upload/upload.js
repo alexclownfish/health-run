@@ -73,13 +73,12 @@ Page({
     }
 
     this.setData({ submitting: true })
-    photoService.uploadCheckInPhoto(this.data.photoPath, this.data.stationIndex)
+    photoService.saveCheckInPhoto(this.data.photoPath)
       .then((savedPath) => {
-      const savedLocally = typeof savedPath === 'string' && savedPath.startsWith('local://')
       const progress = progressStore.completeStation(this.data.stationIndex, savedPath)
       if (progress.completed <= this.data.stationIndex) {
         this.setData({ submitting: false })
-        wx.showToast({ title: '上传状态失效，请重新完成动作', icon: 'none' })
+        wx.showToast({ title: '保存状态失效，请重新完成动作', icon: 'none' })
         return
       }
       this.setData({
@@ -87,7 +86,7 @@ Page({
         successVisible: true,
         completed: progress.completed,
         successProgress: Math.round(progress.completed / 3 * 100),
-        storageNotice: savedLocally ? '云端暂不可用，照片已保存到本机' : '照片已保存至微信云端',
+        storageNotice: '照片已保存在当前设备',
         continueLabel: progress.completed === 3 ? '生成完赛凭证' : '查看下一站'
       })
       wx.vibrateShort({ type: 'medium' })
@@ -97,10 +96,10 @@ Page({
         wx.vibrateShort({ type: 'heavy' })
         const errorCode = error && error.code && error.code !== 'UNKNOWN' ? `\n错误码：${error.code}` : ''
         wx.showModal({
-          title: '照片上传失败',
-          content: `请检查网络、存储空间或云开发配置后重试。照片未保存成功，本点位不会解锁。${errorCode}`,
+          title: '照片保存失败',
+          content: `请检查设备存储空间后重试。照片未保存成功，本点位不会解锁。${errorCode}`,
           showCancel: false,
-          confirmColor: '#005D46'
+          confirmColor: '#5664C2'
         })
       })
   },

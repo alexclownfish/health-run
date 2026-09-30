@@ -36,7 +36,7 @@
   </view>
 
   <view class="fixed-action">
-    <button class="primary-button" loading="{{submitting}}" disabled="{{!photoPath || !privacyAccepted || submitting}}" bindtap="submitPoint"><text>{{submitting ? '上传中...' : '上传并完成点位'}}</text><text class="arrow">↥</text></button>
+    <button class="primary-button" loading="{{submitting}}" disabled="{{!photoPath || !privacyAccepted || submitting}}" bindtap="submitPoint"><text>{{submitting ? '保存中...' : '保存并完成点位'}}</text><text class="arrow">↥</text></button>
   </view>
 
   <view wx:if="{{successVisible}}" class="sheet-mask">

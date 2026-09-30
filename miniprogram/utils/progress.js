@@ -57,11 +57,26 @@ function startRoute() {
   return saveProgress(current)
 }
 
-function checkInStation(index, source = 'nfc') {
+function checkInStation(index, source = 'qr-code', metadata = {}) {
   const current = startRoute()
   const safeIndex = Math.min(Math.max(Number(index) || 0, 0), 2)
   if (safeIndex !== current.completed) return current
-  current.checkins[String(safeIndex)] = { at: Date.now(), source }
+  const key = String(safeIndex)
+  const evidence = metadata && typeof metadata === 'object' ? metadata : {}
+  const existing = current.checkins[key]
+  const existingQrVerified = existing && existing.at &&
+    existing.source === 'qr-code' &&
+    typeof existing.qrId === 'string' && existing.qrId &&
+    typeof existing.pointCode === 'string' && existing.pointCode &&
+    existing.assurance === 'LOCAL_QR_MATCH'
+  if (existingQrVerified) return current
+  current.checkins[key] = {
+    at: Date.now(),
+    source,
+    qrId: typeof evidence.qrId === 'string' ? evidence.qrId : '',
+    pointCode: typeof evidence.pointCode === 'string' ? evidence.pointCode : '',
+    assurance: typeof evidence.assurance === 'string' ? evidence.assurance : 'LOCAL_QR_MATCH'
+  }
   return saveProgress(current)
 }
 

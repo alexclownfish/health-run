@@ -3,3 +3,7 @@ miniprogram/project.config.json
 node_modules/
 .DS_Store
 npm-debug.log*
+*.log
+.env*
+.vscode/
+.idea/

@@ -1,0 +1,4 @@
+batch_id,tag_id,point,station_index,material_type,payload_version,tag_token,uid_canonical,model_id,scheme,scheme_fingerprint,ndef_readback_passed,mounted_read_passed,verified_at,verifier
+2026-09-event,TAG-001-A,001,0,NORMAL,1,ced81f9f7eb9a66ad9e5bcd07d732613,,,,,false,false,,
+2026-09-event,TAG-002-A,002,1,NORMAL,1,6a75420f4b73f6b13b73679a280c0a2e,,,,,false,false,,
+2026-09-event,TAG-003-A,003,2,NORMAL,1,f8f3d159740d3cf8104f3aa5618302e,,,,,false,false,,

@@ -25,7 +25,7 @@ Page({
       stats,
       completed: progress.completed,
       badges: [
-        { icon: '♙', title: '初次出发', color: 'lime', unlocked: progress.history.length > 0 },
+        { icon: '♙', title: '初次出发', color: 'orange', unlocked: progress.history.length > 0 },
         { icon: 'ϟ', title: '能量满格', color: 'blue', unlocked: progress.completed === 3 },
         { icon: '☀', title: '完整路线', color: 'coral', unlocked: progress.completed === 3 }
       ]
@@ -57,7 +57,7 @@ Page({
       content: '头像和昵称来自微信授权控件；打卡照片仅用于本次路线记录，当前版本不会公开展示。',
       showCancel: false,
       confirmText: '知道了',
-      confirmColor: '#005D46'
+      confirmColor: '#5664C2'
     })
   },
 
@@ -66,7 +66,7 @@ Page({
       title: '重置本次路线',
       content: '会清除当前路线的点位、动作和照片记录，历史数据也会一并清除。',
       confirmText: '确认重置',
-      confirmColor: '#E55B40',
+      confirmColor: '#F15B68',
       success: (result) => {
         if (!result.confirm) return
         progressStore.resetProgress()
@@ -80,9 +80,9 @@ Page({
   showHelp() {
     wx.showModal({
       title: '打卡流程',
-      content: '到达点位后触碰 NFC，点击开始动作并完成计时，再拍照上传。只有照片上传成功后才会解锁下一站。',
+      content: '到达点位后打开打卡页扫码，点击开始动作并完成计时，再拍照上传。只有照片上传成功后才会解锁下一站。',
       showCancel: false,
-      confirmColor: '#005D46'
+      confirmColor: '#5664C2'
     })
   }
 })

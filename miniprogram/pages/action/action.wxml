@@ -1,6 +1,6 @@
 <view class="page action-page with-fixed-action">
   <view class="checkpoint-bar">
-    <view><view class="status-dot"></view><text class="mono">PATCH_0{{station.id}} / NFC CONNECTED</text></view>
+    <view><view class="status-dot"></view><text class="mono">PATCH_0{{station.id}} / POINT VERIFIED</text></view>
     <text>✓</text>
   </view>
 

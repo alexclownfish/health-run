@@ -1,0 +1,34 @@
+<view class="page checkin-page">
+  <view class="status-line">
+    <view class="status-dot {{success ? 'success' : state === 'REJECTED' ? 'error' : 'active'}}"></view>
+    <text class="mono">{{statusLabel}}</text>
+  </view>
+
+  <view class="reader {{success ? 'reader-success' : state === 'REJECTED' ? 'reader-error' : ''}} {{state === 'IDLE_QR' ? 'reader-idle' : ''}} reader-qr">
+    <view class="reader-ring ring-a"></view>
+    <view class="reader-ring ring-b"></view>
+    <view class="reader-phone">
+      <view class="reader-speaker"></view>
+      <text>{{success ? '✓' : state === 'REJECTED' ? '!' : 'QR'}}</text>
+    </view>
+    <view wx:if="{{state === 'SCANNING_QR'}}" class="reader-tag">CODE</view>
+  </view>
+
+  <view class="result-copy">
+    <text wx:if="{{station}}" class="eyebrow">POINT {{station.id}} / {{station.location}}</text>
+    <text wx:else class="eyebrow">LOCAL CHECK IN</text>
+    <text class="result-title">{{title}}</text>
+    <text class="result-message">{{message}}</text>
+  </view>
+
+  <view class="assurance-note">
+    <text class="note-title">本机验证</text>
+    <text>打卡进度仅保存在当前设备。清除数据、重装或更换手机后无法恢复。</text>
+  </view>
+
+  <view wx:if="{{showPrimary || showRetry || showRoute}}" class="checkin-actions">
+    <button wx:if="{{showPrimary}}" class="primary-button" bindtap="startQrScan">扫码打卡</button>
+    <button wx:if="{{showRetry}}" class="primary-button" bindtap="retry">重新尝试</button>
+    <button wx:if="{{showRoute}}" class="secondary-button" bindtap="goRoute">返回路线</button>
+  </view>
+</view>

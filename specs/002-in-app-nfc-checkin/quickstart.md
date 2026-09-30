@@ -1,0 +1,26 @@
+# Validation Quickstart: Platform-Neutral QR Check-in
+
+## Preparation
+
+- Upload the latest build using the real AppID and select it as the experience version.
+- Print the three exact payloads in `miniprogram/utils/qr-tags.js` as ordinary text QR codes.
+- Prepare representative Android, HarmonyOS, and iOS phones.
+- Use the same tests on each device; no NFC setting or tag is required.
+
+## Success
+
+1. Open the mini-program normally and enter the current point check-in page.
+2. Confirm the button says `扫码打卡` and camera does not start automatically.
+3. Tap the button and scan the current point QR.
+4. Confirm one `LOCAL_QR_MATCH` check-in and one action-page transition.
+5. Complete the action, save the local photo, and proceed through all three points.
+
+## Failure and Lifecycle
+
+Scan another point, an ordinary URL, malformed text, an unregistered QR, and an old `HR1` label text. Each must reject without a check-in. Cancel the scanner and deny camera permission; both must expose recovery. Verify native scanner hide/show, duplicate callbacks, page unload, and returning from background. Completed points and photos from older builds must remain available.
+
+## Release
+
+Confirm installed QR readability and the full action/photo/certificate flow on each target platform. Test local validation offline after the mini-program package is available. Use the in-app button: WeChat home `扫一扫` cannot trigger check-in from these plain-text codes.
+
+Physical device checks remain pending until performed. No UID, NDEF, tag-locking, or HarmonyOS NFC whitelist verification is required.

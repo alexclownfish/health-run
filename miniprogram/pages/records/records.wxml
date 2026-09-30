@@ -25,6 +25,6 @@
       <view class="history-copy"><text>{{item.title}}</text><text>{{item.detail}}</text></view>
       <text class="history-status">{{item.status}}</text>
     </view>
-    <view wx:if="{{!recentActivities.length}}" class="empty-history"><text>还没有打卡记录</text><text>完成第一个 NFC 点位后，这里会显示真实活动。</text></view>
+    <view wx:if="{{!recentActivities.length}}" class="empty-history"><text>还没有打卡记录</text><text>完成第一个点位扫码后，这里会显示真实活动。</text></view>
   </view>
 </view>

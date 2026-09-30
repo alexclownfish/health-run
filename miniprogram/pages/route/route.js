@@ -1,8 +1,6 @@
 const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
-const nfc = require('../../utils/nfc')
 const userStore = require('../../utils/user')
-const featureFlags = require('../../utils/config')
 const { getActivityContext } = require('../../utils/format')
 
 Page({
@@ -11,13 +9,9 @@ Page({
     completed: 0,
     progressTitle: '准备出发',
     ctaLabel: '开始漫步',
-    nfcVisible: false,
-    nfcLoading: false,
-    currentStation: null,
     user: userStore.defaultUser(),
     userInitial: '我',
     activity: getActivityContext(),
-    showNfcSkip: featureFlags.allowNfcSkip,
     profileVisible: false
   },
 
@@ -100,7 +94,7 @@ Page({
       return
     }
     progressStore.startRoute()
-    this.openNfc(this.data.completed)
+    this.openCheckin()
   },
 
   handleStationTap(event) {
@@ -117,59 +111,10 @@ Page({
       return
     }
     wx.vibrateShort({ type: 'light' })
-    this.openNfc(index)
+    this.openCheckin()
   },
 
-  openNfc(index) {
-    this.setData({
-      currentStation: stations[index],
-      nfcVisible: true,
-      nfcLoading: false
-    })
-  },
-
-  closeNfc() {
-    if (this.data.nfcLoading) return
-    this.setData({ nfcVisible: false })
-  },
-
-  preventClose() {},
-
-  scanNfc() {
-    if (this.data.nfcLoading) return
-    this.setData({ nfcLoading: true })
-    nfc.discoverOnce(8000)
-      .then(() => {
-        this.enterCurrentStation('nfc')
-      })
-      .catch((error) => {
-        this.setData({ nfcLoading: false })
-        const unsupported = error && error.message === 'NFC_UNSUPPORTED'
-        wx.showModal({
-          title: unsupported ? '当前设备不支持 NFC' : '暂未读取到标签',
-          content: unsupported ? '请在支持 NFC 的安卓设备上体验真实感应。当前设备无法继续本次打卡。' : '请将手机顶部贴近标牌后重试。',
-          confirmText: '知道了',
-          cancelText: '重试',
-          confirmColor: '#005D46',
-          success: () => {}
-        })
-      })
-  },
-
-  skipNfc() {
-    if (this.data.nfcLoading) return
-    wx.vibrateShort({ type: 'light' })
-    this.setData({ nfcLoading: true })
-    setTimeout(() => {
-      this.enterCurrentStation('nfc-skip')
-    }, 650)
-  },
-
-  enterCurrentStation(source) {
-    const index = this.data.currentStation.id - 1
-    progressStore.checkInStation(index, source)
-    wx.vibrateShort({ type: 'medium' })
-    this.setData({ nfcVisible: false, nfcLoading: false })
-    wx.navigateTo({ url: `/pages/action/action?station=${index}` })
-  },
+  openCheckin() {
+    wx.navigateTo({ url: '/pages/checkin/checkin' })
+  }
 })

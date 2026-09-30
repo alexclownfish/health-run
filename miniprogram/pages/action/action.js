@@ -19,7 +19,7 @@ Page({
     const progress = progressStore.readProgress()
     const action = progress.actions[String(index)]
     if (index !== progress.completed || !progressStore.hasValidCheckIn(progress, index)) {
-      wx.showToast({ title: '请先完成 NFC 感应', icon: 'none' })
+      wx.showToast({ title: '请先完成扫码打卡', icon: 'none' })
       setTimeout(() => wx.navigateBack(), 900)
       return
     }
@@ -49,7 +49,7 @@ Page({
     if (!this.data.actionStarted) {
       const started = progressStore.startAction(this.data.stationIndex)
       if (!started.actions[String(this.data.stationIndex)] || !started.actions[String(this.data.stationIndex)].startedAt) {
-        wx.showToast({ title: '请重新触碰 NFC', icon: 'none' })
+        wx.showToast({ title: '请重新扫码打卡', icon: 'none' })
         return
       }
       this.setData({ actionStarted: true })

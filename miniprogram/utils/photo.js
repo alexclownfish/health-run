@@ -1,10 +1,8 @@
-const config = require('./config')
-
 function saveLocal(filePath) {
   return new Promise((resolve, reject) => {
     wx.saveFile({
       tempFilePath: filePath,
-      success: (result) => resolve(`local://${result.savedFilePath || filePath}`),
+      success: (result) => resolve(result.savedFilePath || filePath),
       fail: reject
     })
   })
@@ -24,29 +22,9 @@ function withUploadContext(error) {
   return wrapped
 }
 
-function uploadCheckInPhoto(filePath, stationIndex) {
+function saveCheckInPhoto(filePath) {
   if (!filePath) return Promise.reject(new Error('PHOTO_REQUIRED'))
-  const extension = filePath.includes('.') ? filePath.split('.').pop().toLowerCase() : 'jpg'
-  const cloudPath = `health-run/route-01/station-${Number(stationIndex) + 1}/${Date.now()}.${extension}`
-  if (config.cloudEnvId && wx.cloud && typeof wx.cloud.uploadFile === 'function') {
-    return new Promise((resolve, reject) => {
-      wx.cloud.uploadFile({
-        config: { env: config.cloudEnvId },
-        cloudPath,
-        filePath,
-        success: (result) => {
-          if (result.fileID) resolve(result.fileID)
-          else reject(new Error('CLOUD_FILE_ID_MISSING'))
-        },
-        fail: (error) => {
-          if (config.allowLocalPhotoFallback) saveLocal(filePath).then(resolve).catch((localError) => reject(withUploadContext(localError)))
-          else reject(withUploadContext(error))
-        }
-      })
-    })
-  }
-  if (config.allowLocalPhotoFallback) return saveLocal(filePath)
-  return Promise.reject(withUploadContext(new Error('CLOUD_ENV_NOT_CONFIGURED')))
+  return saveLocal(filePath).catch((error) => Promise.reject(withUploadContext(error)))
 }
 
-module.exports = { getErrorCode, saveLocal, uploadCheckInPhoto }
+module.exports = { getErrorCode, saveLocal, saveCheckInPhoto }

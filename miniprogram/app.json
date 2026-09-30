@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/route/route",
+    "pages/checkin/checkin",
     "pages/action/action",
     "pages/upload/upload",
     "pages/certificate/certificate",
@@ -9,16 +10,16 @@
   ],
   "window": {
     "navigationBarTitleText": "轻跑",
-    "navigationBarBackgroundColor": "#F4F7F2",
+    "navigationBarBackgroundColor": "#FFF8F0",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#F4F7F2",
+    "backgroundColor": "#FFF8F0",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#778B82",
-    "selectedColor": "#005D46",
+    "color": "#887983",
+    "selectedColor": "#5664C2",
     "backgroundColor": "#FFFFFF",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "position": "bottom",
     "list": [
       {
