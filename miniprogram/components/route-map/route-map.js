@@ -21,7 +21,7 @@ Component({
     markers: [],
     polyline: [{
       points: MAP_POINTS,
-      color: '#f76b2b',
+      color: '#f1694c',
       width: 7,
       borderColor: '#ffffff',
       borderWidth: 2,

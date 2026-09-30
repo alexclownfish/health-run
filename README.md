@@ -5,6 +5,14 @@
 - `ui-prototype/`：之前完成的 H5 UI 原型，打开 `ui-prototype/index.html` 即可预览。
 - `miniprogram/`：微信原生小程序源码，导入项目根目录到微信开发者工具即可运行。
 
+## 配色版本分支
+
+- `theme/green`：换肤前的绿色配色，保留最新的全平台扫码打卡和纯前端本地保存流程。
+- `theme/warm-orange-indigo`：暖橙 + 靛蓝配色，同一套业务流程。
+- `main`：原有历史版本，本次不更新。
+
+当前分支使用绿色配色。`specs/003-warm-orange-indigo-theme/` 中的设计稿和 HTML 预览保留为暖橙版本的历史资料，不代表本分支运行时颜色。
+
 ## 导入方式
 
 使用微信开发者工具打开当前仓库根目录，工具会读取 `project.config.json` 的 `miniprogramRoot` 配置。项目已配置正式 AppID，上传前需在开发者工具中登录拥有该小程序权限的微信账号。

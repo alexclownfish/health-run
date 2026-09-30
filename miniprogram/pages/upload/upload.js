@@ -99,7 +99,7 @@ Page({
           title: '照片保存失败',
           content: `请检查设备存储空间后重试。照片未保存成功，本点位不会解锁。${errorCode}`,
           showCancel: false,
-          confirmColor: '#5664C2'
+          confirmColor: '#005D46'
         })
       })
   },

@@ -1,7 +1,7 @@
 {
   "navigationBarTitleText": "活动路线",
   "enablePullDownRefresh": true,
-  "backgroundColor": "#FFF8F0",
+  "backgroundColor": "#F4F7F2",
   "usingComponents": {
     "route-map": "/components/route-map/route-map",
     "profile-auth": "/components/profile-auth/profile-auth"

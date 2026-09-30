@@ -1,18 +1,18 @@
 .action-page { padding-top: 18rpx; }
-.checkpoint-bar { height: 74rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 23rpx; border-radius: 18rpx 18rpx 0 0; color: #e9ebff; background: var(--deep); font-size: 17rpx; }
+.checkpoint-bar { height: 74rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 23rpx; border-radius: 18rpx 18rpx 0 0; color: #c5f4db; background: var(--deep); font-size: 17rpx; }
 .checkpoint-bar > view { display: flex; align-items: center; gap: 13rpx; }
-.checkpoint-bar > text { color: var(--yellow); font-size: 27rpx; }
-.motion-card { position: relative; overflow: hidden; height: 530rpx; display: flex; align-items: center; justify-content: center; border: 1rpx solid var(--line); border-top: 0; border-radius: 0 0 18rpx 18rpx; background: var(--peach); }
-.motion-orbit { position: absolute; border: 46rpx solid rgba(247,107,43,.14); border-radius: 50%; }
+.checkpoint-bar > text { color: var(--lime); font-size: 27rpx; }
+.motion-card { position: relative; overflow: hidden; height: 530rpx; display: flex; align-items: center; justify-content: center; border: 1rpx solid var(--line); border-top: 0; border-radius: 0 0 18rpx 18rpx; background: #e7f4ec; }
+.motion-orbit { position: absolute; border: 46rpx solid rgba(76,202,172,.14); border-radius: 50%; }
 .orbit-one { width: 420rpx; height: 420rpx; }
-.orbit-two { width: 290rpx; height: 290rpx; border-color: rgba(255,211,78,.24); }
+.orbit-two { width: 290rpx; height: 290rpx; border-color: rgba(168,238,36,.19); }
 .motion-person { position: relative; z-index: 2; width: 350rpx; height: 430rpx; margin-top: 42rpx; animation: breathe 3s ease-in-out infinite; }
 @keyframes breathe { 50% { transform: translateY(-4rpx) scale(1.015); } }
 .head { position: absolute; z-index: 4; top: 18rpx; left: 132rpx; width: 88rpx; height: 100rpx; border: 8rpx solid var(--ink); border-radius: 48%; background: #ffc3a6; }
 .head::before { content: ''; position: absolute; left: -8rpx; top: -10rpx; width: 90rpx; height: 44rpx; border-radius: 45rpx 45rpx 8rpx 8rpx; background: var(--ink); }
 .neck { position: absolute; z-index: 3; top: 105rpx; left: 156rpx; width: 40rpx; height: 46rpx; border: 6rpx solid var(--ink); background: #ffc3a6; }
-.body { position: absolute; z-index: 3; top: 133rpx; left: 92rpx; width: 168rpx; height: 280rpx; border: 8rpx solid var(--ink); border-radius: 58rpx 58rpx 16rpx 16rpx; background: var(--orange); }
-.body::after { content: ''; position: absolute; top: 33rpx; right: 18rpx; left: 18rpx; height: 16rpx; border-bottom: 9rpx solid var(--orange-bright); border-radius: 50%; }
+.body { position: absolute; z-index: 3; top: 133rpx; left: 92rpx; width: 168rpx; height: 280rpx; border: 8rpx solid var(--ink); border-radius: 58rpx 58rpx 16rpx 16rpx; background: var(--green); }
+.body::after { content: ''; position: absolute; top: 33rpx; right: 18rpx; left: 18rpx; height: 16rpx; border-bottom: 9rpx solid #11b6b5; border-radius: 50%; }
 .arm { position: absolute; z-index: 2; top: 145rpx; width: 58rpx; height: 218rpx; border: 8rpx solid var(--ink); border-radius: 35rpx; background: #ffc3a6; transform-origin: 50% 18rpx; }
 .left-arm { left: 60rpx; transform: rotate(29deg); animation: left-arm 3s ease-in-out infinite; }
 .right-arm { right: 58rpx; transform: rotate(-29deg); animation: right-arm 3s ease-in-out infinite; }
@@ -24,17 +24,17 @@
 @keyframes wrist-right { 0%,100% { transform: rotate(-67deg); } 50% { transform: rotate(-61deg) translateY(-7rpx); } }
 .motion-2 { animation-name: side-bend; }
 @keyframes side-bend { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(6deg); } }
-.motion-label { position: absolute; z-index: 5; bottom: 20rpx; padding: 13rpx 20rpx; border-radius: 30rpx; color: #fff; background: rgba(43,35,48,.9); font-size: 19rpx; }
+.motion-label { position: absolute; z-index: 5; bottom: 20rpx; padding: 13rpx 20rpx; border-radius: 30rpx; color: #fff; background: rgba(16,45,37,.9); font-size: 19rpx; }
 .instruction { padding: 36rpx 4rpx 22rpx; }
 .instruction-title, .instruction-copy { display: block; }
 .instruction-title { margin-top: 10rpx; font-size: 39rpx; font-weight: 800; }
 .instruction-copy { margin-top: 12rpx; color: var(--muted); font-size: 22rpx; line-height: 1.75; }
 .timer-card { display: flex; align-items: center; justify-content: space-between; padding: 18rpx 22rpx; box-shadow: none; }
 .timer-text { font-size: 52rpx; font-weight: 600; }
-.timer-button { display: flex; align-items: center; gap: 11rpx; min-height: 68rpx; margin: 0; padding: 0 20rpx; border: 0; border-radius: 12rpx; color: #fff; background: var(--primary); font-size: 20rpx; line-height: 1; }
-.timer-button.complete { color: var(--deep); background: var(--lavender); }
-.safety-card { display: grid; grid-template-columns: 70rpx 1fr; gap: 18rpx; align-items: center; margin-top: 24rpx; padding: 22rpx; border-radius: 17rpx; background: var(--peach); }
-.safety-icon { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #a45d20; background: #ffd9a8; font-size: 31rpx; }
+.timer-button { display: flex; align-items: center; gap: 11rpx; min-height: 68rpx; margin: 0; padding: 0 20rpx; border: 0; border-radius: 12rpx; color: #fff; background: var(--green); font-size: 20rpx; line-height: 1; }
+.timer-button.complete { color: var(--deep); background: var(--lime-soft); }
+.safety-card { display: grid; grid-template-columns: 70rpx 1fr; gap: 18rpx; align-items: center; margin-top: 24rpx; padding: 22rpx; border-radius: 17rpx; background: var(--cream); }
+.safety-icon { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #a46a19; background: #ffe1a4; font-size: 31rpx; }
 .safety-card text { display: block; }
 .safety-card text:first-child { color: #8b5a19; font-size: 23rpx; font-weight: 700; }
 .safety-card text:last-child { margin-top: 6rpx; color: #866d4c; font-size: 18rpx; line-height: 1.55; }

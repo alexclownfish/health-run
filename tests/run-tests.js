@@ -377,29 +377,29 @@ run('wxss files have balanced braces', () => {
   }
 })
 
-run('warm orange and indigo theme has no legacy green tokens', () => {
-  const requiredTokens = ['--ink', '--deep', '--primary', '--orange', '--orange-bright', '--yellow', '--coral', '--lavender', '--peach', '--paper', '--line', '--muted', '--disabled']
+run('green theme tokens, navigation and map states remain consistent', () => {
   const appStyles = fs.readFileSync(path.join(miniRoot, 'app.wxss'), 'utf8')
-  for (const token of requiredTokens) assert.match(appStyles, new RegExp(`${token}:`), token)
-
-  const sourceFiles = [
-    path.join(miniRoot, 'app.wxss'),
-    path.join(miniRoot, 'app.json'),
-    ...pages.map((page) => path.join(miniRoot, 'pages', page, `${page}.wxss`)),
-    ...pages.map((page) => path.join(miniRoot, 'pages', page, `${page}.json`)),
-    ...components.map((component) => path.join(miniRoot, 'components', component, `${component}.wxss`)),
-    path.join(miniRoot, 'components', 'route-map', 'route-map.js'),
-    path.join(miniRoot, 'utils', 'route.js'),
-    path.join(miniRoot, 'pages', 'certificate', 'certificate.js'),
-    path.join(miniRoot, 'pages', 'profile', 'profile.js'),
-    path.join(miniRoot, 'pages', 'upload', 'upload.js')
-  ]
-  const legacyColors = /#(?:102d25|005d46|087d5c|a8ee24|e5f8c7|d9f2e7|f4f7f2|d7e2db|6c7e76|55c7dd|f1694c|edf6f1|e4ebe7|e7f4ec|e4f3ec|8bdcc6|48c4aa|9fc9b6|c5f4db|c2ded3|b1d0c4|c7eadd|85978f)\b/i
-  for (const file of sourceFiles) {
+  const tokens = Object.fromEntries([...appStyles.matchAll(/--([a-z-]+):\s*(#[0-9a-f]+);/g)].map((match) => [match[1], match[2]]))
+  assert.equal(tokens.ink, '#102d25')
+  assert.equal(tokens.deep, '#005d46')
+  assert.equal(tokens.green, '#087d5c')
+  assert.equal(tokens.lime, '#a8ee24')
+  assert.equal(tokens.paper, '#f4f7f2')
+  const styleFiles = [path.join(miniRoot, 'app.wxss'), ...pages.map((page) => path.join(miniRoot, 'pages', page, `${page}.wxss`)), ...components.map((component) => path.join(miniRoot, 'components', component, `${component}.wxss`))]
+  for (const file of styleFiles) {
     const source = fs.readFileSync(file, 'utf8')
-    assert.doesNotMatch(source, /var\(--(?:green|mint|lime|blue|cream)\)/i, path.relative(root, file))
-    assert.doesNotMatch(source, legacyColors, path.relative(root, file))
+    for (const [, token] of source.matchAll(/var\(--([a-z-]+)\)/g)) {
+      assert.ok(token === 'percent' || token in tokens, `${path.relative(root, file)}: undefined token ${token}`)
+    }
   }
+  const app = readJson(path.join(miniRoot, 'app.json'))
+  assert.equal(app.window.backgroundColor.toLowerCase(), tokens.paper)
+  assert.equal(app.window.navigationBarBackgroundColor.toLowerCase(), tokens.paper)
+  assert.equal(app.tabBar.selectedColor.toLowerCase(), tokens.deep)
+  const route = require(path.join(miniRoot, 'utils', 'route.js'))
+  assert.equal(route.getMapMarkers(0)[1].label.bgColor, tokens.lime)
+  assert.equal(route.getMapMarkers(1)[1].label.bgColor, tokens.deep)
+  assert.equal(route.getMapMarkers(3).filter((marker) => marker.id > 0 && marker.label.bgColor === tokens.deep).length, 3)
 })
 
 async function runAsync(label, callback) {

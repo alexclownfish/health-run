@@ -6,6 +6,8 @@
 
 **Status**: Production theme implementation is complete. Device and Developer Tools visual verification remains pending.
 
+**Green branch note**: `theme/green` restores the pre-migration green runtime palette while retaining the latest QR business flow. The tasks below document the historical warm-orange implementation; they are not the active palette contract for this branch. The HTML preview remains a warm-orange design reference.
+
 ## Phase 1: Theme Foundation
 
 - [x] T001 Confirm the approved palette and semantic rules in `specs/003-warm-orange-indigo-theme/visual-direction.md`

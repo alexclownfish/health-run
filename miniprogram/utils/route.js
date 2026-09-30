@@ -87,7 +87,7 @@ function getMapMarkers(completed = 0) {
   const markers = [{
     id: 0,
     ...points[0],
-    label: { content: 'S', color: '#ffffff', fontSize: 12, bgColor: '#f76b2b', borderColor: '#ffffff', borderWidth: 2, borderRadius: 24, padding: 7, anchorX: -12, anchorY: -24 }
+    label: { content: 'S', color: '#ffffff', fontSize: 12, bgColor: '#005d46', borderColor: '#ffffff', borderWidth: 2, borderRadius: 24, padding: 7, anchorX: -12, anchorY: -24 }
   }]
   TASK_TRACK_INDEX.forEach((trackIndex, index) => {
     const point = points[trackIndex]
@@ -98,9 +98,9 @@ function getMapMarkers(completed = 0) {
       ...point,
       label: {
         content: done ? '✓' : String(index + 1),
-        color: done || current ? '#ffffff' : '#2b2330',
+        color: done || current ? '#ffffff' : '#102d25',
         fontSize: 12,
-        bgColor: done ? '#3f4b9f' : current ? '#ffd34e' : '#ffffff',
+        bgColor: done ? '#005d46' : current ? '#a8ee24' : '#ffffff',
         borderColor: '#ffffff',
         borderWidth: 2,
         borderRadius: 24,
@@ -110,7 +110,7 @@ function getMapMarkers(completed = 0) {
       },
       callout: current ? {
         content: `任务 ${index + 1} · 标注点 ${['0', '3', '4'][index]}`,
-        color: '#3f4b9f',
+        color: '#005d46',
         fontSize: 11,
         borderRadius: 8,
         bgColor: '#ffffff',

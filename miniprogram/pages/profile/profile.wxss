@@ -1,28 +1,28 @@
 .profile-page { padding-top: 18rpx; }
 .page-title { display: block; }
 .profile-hero { display: flex; gap: 23rpx; align-items: center; min-height: 166rpx; margin-top: 28rpx; padding: 28rpx 30rpx; border-radius: 18rpx; color: #fff; background: var(--deep); }
-.profile-avatar { overflow: hidden; flex: 0 0 106rpx; width: 106rpx; min-width: 106rpx; max-width: 106rpx; height: 106rpx; display: flex; align-items: center; justify-content: center; border: 4rpx solid rgba(255,255,255,.85); border-radius: 50%; color: var(--ink); background: var(--yellow); font-size: 37rpx; font-weight: 800; }
+.profile-avatar { overflow: hidden; flex: 0 0 106rpx; width: 106rpx; min-width: 106rpx; max-width: 106rpx; height: 106rpx; display: flex; align-items: center; justify-content: center; border: 4rpx solid rgba(255,255,255,.85); border-radius: 50%; color: var(--deep); background: var(--lime); font-size: 37rpx; font-weight: 800; }
 .profile-avatar image { width: 100%; height: 100%; }
 .profile-copy { flex: 1; min-width: 0; }
 .profile-copy text { display: block; }
 .profile-copy > text:first-child { font-size: 34rpx; font-weight: 800; }
-.profile-edit { overflow: hidden; margin-top: 7rpx; color: #d9dcff; font-size: 18rpx; text-overflow: ellipsis; white-space: nowrap; }
-.route-status { display: inline-block !important; width: auto; margin-top: 12rpx; padding: 6rpx 13rpx; border-radius: 20rpx; color: var(--yellow); background: rgba(255,211,78,.14); font-size: 16rpx; }
-.profile-hero > .chevron { flex: 0 0 24rpx; color: #c5c8ed; font-size: 40rpx; }
+.profile-edit { overflow: hidden; margin-top: 7rpx; color: #c2ded3; font-size: 18rpx; text-overflow: ellipsis; white-space: nowrap; }
+.route-status { display: inline-block !important; width: auto; margin-top: 12rpx; padding: 6rpx 13rpx; border-radius: 20rpx; color: var(--lime); background: rgba(168,238,36,.12); font-size: 16rpx; }
+.profile-hero > .chevron { flex: 0 0 24rpx; color: #a8beb5; font-size: 40rpx; }
 .level-card { margin-top: 20rpx; padding: 25rpx; box-shadow: none; }
 .level-head, .level-foot { display: flex; justify-content: space-between; align-items: center; }
-.level-head text:first-child { color: var(--muted); font-size: 18rpx; }.level-head text:last-child { color: var(--orange); font-size: 20rpx; font-weight: 600; }
-.level-track { overflow: hidden; height: 11rpx; margin: 20rpx 0 13rpx; border-radius: 6rpx; background: #ece8e8; }
-.level-track view { width: 85%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--yellow)); }
+.level-head text:first-child { color: var(--muted); font-size: 18rpx; }.level-head text:last-child { color: var(--green); font-size: 20rpx; font-weight: 600; }
+.level-track { overflow: hidden; height: 11rpx; margin: 20rpx 0 13rpx; border-radius: 6rpx; background: #e4ebe7; }
+.level-track view { width: 85%; height: 100%; background: linear-gradient(90deg, var(--green), var(--lime)); }
 .level-foot { color: var(--muted); font-size: 16rpx; }
 .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15rpx; }
 .badge-grid > view { text-align: center; }
-.badge { width: 98rpx; height: 98rpx; display: flex; align-items: center; justify-content: center; margin: 0 auto 13rpx; border: 1rpx solid #ead5c7; border-radius: 50%; color: var(--deep); background: var(--peach); font-size: 41rpx; }
-.badge.blue { color: var(--deep); background: var(--lavender); }.badge.coral { color: #c44c5e; background: #ffe1e3; }.badge.locked { color: #989094; background: #ebe8e8; }
+.badge { width: 98rpx; height: 98rpx; display: flex; align-items: center; justify-content: center; margin: 0 auto 13rpx; border: 1rpx solid #c9d9cf; border-radius: 50%; color: var(--deep); background: var(--lime-soft); font-size: 41rpx; }
+.badge.blue { color: #167389; background: #daf5fb; }.badge.coral { color: #bd462f; background: #fee2dc; }.badge.locked { color: #98a29d; background: #e9ecea; }
 .badge.is-locked { opacity: .45; }
 .badge-grid text { font-size: 17rpx; font-weight: 600; }
 .settings-list { overflow: hidden; margin-top: 36rpx; box-shadow: none; }
 .settings-list > view { display: grid; grid-template-columns: 58rpx 1fr auto 25rpx; gap: 15rpx; align-items: center; min-height: 98rpx; padding: 13rpx 22rpx; border-bottom: 1rpx solid var(--line); }
 .settings-list > view:last-child { border-bottom: 0; }
-.setting-icon { width: 54rpx; height: 54rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--orange); background: var(--peach); font-size: 26rpx; }
+.setting-icon { width: 54rpx; height: 54rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--green); background: var(--mint); font-size: 26rpx; }
 .settings-list > view > text:nth-child(2) { font-size: 22rpx; }.settings-list > view > text:nth-child(3) { color: var(--muted); font-size: 17rpx; }
