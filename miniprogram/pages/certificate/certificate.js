@@ -1,6 +1,6 @@
 const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
-const { formatClock, formatDateCode } = require('../../utils/format')
+const { formatClock, formatDateCode, formatDuration } = require('../../utils/format')
 const userStore = require('../../utils/user')
 
 Page({
@@ -8,6 +8,7 @@ Page({
     stations,
     certificateId: '',
     completedTime: '',
+    completionDuration: '--',
     completed: 0,
     certificateReady: false,
     ownerName: '微信用户',
@@ -27,9 +28,10 @@ Page({
     const timestamp = progress.completedAt || Date.now()
     this.setData({
       completed: progress.completed,
-      certificateReady: progress.completed === 3,
+      certificateReady: progressStore.isFinished(progress),
       certificateId: formatDateCode(timestamp),
       completedTime: formatClock(timestamp),
+      completionDuration: formatDuration(progress.startedAt, progress.completedAt),
       ownerName: userStore.readUser().nickName || '微信用户'
     })
   },
@@ -125,7 +127,7 @@ Page({
     context.fillText('午间漫步 · 健康同行', 76, 158)
     context.fillStyle = '#fff0e4'
     context.font = '400 22px sans-serif'
-    context.fillText('完成约 1.56 公里实景健康路线', 76, 208)
+    context.fillText('完成实景健康路线', 76, 208)
 
     context.beginPath()
     context.arc(625, 166, 52, 0, Math.PI * 2)
@@ -172,10 +174,10 @@ Page({
     context.textAlign = 'center'
     context.fillStyle = '#887983'
     context.font = '400 19px sans-serif'
-    context.fillText('回到起点 · 能量已释放', 375, 867)
+    context.fillText('回到起点 · 能量已释放', 375, 850)
     context.fillStyle = '#3f4b9f'
-    context.font = '600 20px sans-serif'
-    context.fillText(`完成时间 ${this.data.completedTime}    ·    路程 1.56 km`, 375, 914)
+    context.font = '600 18px sans-serif'
+    context.fillText(`完成时间 ${this.data.completedTime}   ·   总用时 ${this.data.completionDuration}`, 375, 899)
 
     context.strokeStyle = '#f0d9c8'
     context.lineWidth = 1

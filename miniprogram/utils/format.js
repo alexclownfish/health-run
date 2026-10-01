@@ -16,6 +16,17 @@ function formatTimer(seconds) {
   return `00:${pad(Math.max(0, seconds))}`
 }
 
+function formatDuration(startedAt, completedAt) {
+  const start = Number(startedAt)
+  const end = Number(completedAt)
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start <= 0 || end < start) return '--'
+  const totalSeconds = Math.floor((end - start) / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor(totalSeconds % 3600 / 60)
+  const seconds = totalSeconds % 60
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+}
+
 function getActivityContext(timestamp = Date.now()) {
   const date = new Date(timestamp)
   const hour = date.getHours()
@@ -54,4 +65,4 @@ function dateKey(timestamp) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-module.exports = { pad, formatClock, formatDateCode, formatTimer, getActivityContext, getMonthGrid, dateKey }
+module.exports = { pad, formatClock, formatDateCode, formatTimer, formatDuration, getActivityContext, getMonthGrid, dateKey }

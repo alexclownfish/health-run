@@ -3,17 +3,17 @@
 ## Preparation
 
 - Upload the latest build using the real AppID and select it as the experience version.
-- Print the three exact payloads in `miniprogram/utils/qr-tags.js` as ordinary text QR codes.
+- Print the five exact payloads in `specs/004-start-finish-qr-timing/qr-payloads.md` as ordinary text QR codes.
 - Prepare representative Android, HarmonyOS, and iOS phones.
 - Use the same tests on each device; no NFC setting or tag is required.
 
 ## Success
 
-1. Open the mini-program normally and enter the current point check-in page.
+1. Open the mini-program normally and scan the start QR from the route page.
 2. Confirm the button says `扫码打卡` and camera does not start automatically.
-3. Tap the button and scan the current point QR.
-4. Confirm one `LOCAL_QR_MATCH` check-in and one action-page transition.
-5. Complete the action, save the local photo, and proceed through all three points.
+3. Scan the current task-point QR and confirm one `LOCAL_QR_MATCH` check-in and one action-page transition.
+4. Complete the action, save the local photo, and proceed through all three points.
+5. Scan the finish QR only after point 003; confirm the fixed completion time and duration certificate.
 
 ## Failure and Lifecycle
 

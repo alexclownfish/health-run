@@ -7,8 +7,11 @@ Page({
   data: {
     stations: [],
     completed: 0,
+    started: false,
+    finished: false,
     progressTitle: '准备出发',
-    ctaLabel: '开始漫步',
+    ctaLabel: '扫描起点',
+    mapHint: '先扫描起点二维码，开始计时',
     user: userStore.defaultUser(),
     userInitial: '我',
     activity: getActivityContext(),
@@ -32,32 +35,48 @@ Page({
 
   refreshProgress() {
     const progress = progressStore.readProgress()
+    const started = Boolean(progress.startedAt)
+    const finished = progressStore.isFinished(progress)
     const viewStations = stations.map((station, index) => ({
       ...station,
       index,
       number: String(index + 1).padStart(2, '0'),
       done: index < progress.completed,
-      current: index === progress.completed && progress.completed < 3,
-      locked: index > progress.completed,
-      status: index < progress.completed ? 'DONE' : index === progress.completed ? 'NEXT' : 'LOCKED'
+      current: started && index === progress.completed && progress.completed < 3,
+      locked: !started || index > progress.completed,
+      status: index < progress.completed ? 'DONE' : started && index === progress.completed ? 'NEXT' : 'LOCKED'
     }))
 
-    const progressTitle = progress.completed === 0
-      ? '准备出发'
-      : progress.completed === 3
+    const progressTitle = !started
+      ? '扫描起点开始计时'
+      : finished
         ? '路线已完成'
-        : `下一站 · ${stations[progress.completed].title}`
-    const ctaLabel = progress.completed === 0
-      ? '开始漫步'
-      : progress.completed === 3
+        : progress.completed === 3
+          ? '扫描终点结束计时'
+          : `下一站 · ${stations[progress.completed].title}`
+    const ctaLabel = !started
+      ? '扫描起点'
+      : finished
         ? '查看完赛凭证'
-        : `前往点位 ${progress.completed + 1}`
+        : progress.completed === 3
+          ? '扫描终点'
+          : `前往点位 ${progress.completed + 1}`
+    const mapHint = !started
+      ? '先扫描起点二维码，开始计时'
+      : finished
+        ? '已完成起点、3 个任务点和终点打卡'
+        : progress.completed === 3
+          ? '3 个任务点已完成，请扫描终点二维码'
+          : '到达点位后打开打卡页 · 扫码打卡'
 
     this.setData({
       stations: viewStations,
       completed: progress.completed,
+      started,
+      finished,
       progressTitle,
       ctaLabel,
+      mapHint,
       user: userStore.readUser(),
       userInitial: this.getUserInitial(userStore.readUser()),
       activity: getActivityContext()
@@ -89,11 +108,10 @@ Page({
 
   handleStart() {
     wx.vibrateShort({ type: 'light' })
-    if (this.data.completed === 3) {
+    if (this.data.finished) {
       wx.navigateTo({ url: '/pages/certificate/certificate' })
       return
     }
-    progressStore.startRoute()
     this.openCheckin()
   },
 
@@ -103,7 +121,7 @@ Page({
       : Number(event.currentTarget.dataset.index)
     const station = this.data.stations[index]
     if (!station || station.locked) {
-      wx.showToast({ title: '请按路线依次打卡', icon: 'none' })
+      wx.showToast({ title: this.data.started ? '请按路线依次打卡' : '请先扫描起点', icon: 'none' })
       return
     }
     if (station.done) {
@@ -112,6 +130,22 @@ Page({
     }
     wx.vibrateShort({ type: 'light' })
     this.openCheckin()
+  },
+
+  handleStartTap() {
+    if (this.data.started) {
+      wx.showToast({ title: '起点已打卡', icon: 'none' })
+      return
+    }
+    this.handleStart()
+  },
+
+  handleFinishTap() {
+    if (!this.data.started || this.data.completed < 3) {
+      wx.showToast({ title: '请先完成三个任务点', icon: 'none' })
+      return
+    }
+    this.handleStart()
   },
 
   openCheckin() {

@@ -36,6 +36,9 @@
 .station-card.locked { opacity: .48; }
 .station-number { width: 68rpx; height: 68rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--ink); background: var(--yellow); font-family: monospace; font-size: 21rpx; }
 .station-card.done .station-number { color: #fff; background: var(--deep); }
+.endpoint-card .station-number { color: var(--deep); background: var(--lavender); }
+.station-copy { min-width: 0; }
+.station-copy text { overflow-wrap: break-word; }
 .station-copy text, .station-meta text { display: block; }
 .station-copy text:first-child { font-size: 26rpx; font-weight: 700; }
 .station-copy text:last-child { margin-top: 6rpx; color: var(--muted); font-size: 18rpx; }

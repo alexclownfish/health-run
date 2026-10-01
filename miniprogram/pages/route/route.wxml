@@ -37,7 +37,7 @@
     </view>
 
     <view class="map"><route-map completed="{{completed}}" bindstationtap="handleStationTap"></route-map></view>
-    <view class="map-hint"><text class="scan-icon">⌗</text><text>到达点位后打开打卡页 · 扫码打卡</text></view>
+    <view class="map-hint"><text class="scan-icon">⌗</text><text>{{mapHint}}</text></view>
   </view>
 
   <view class="section-head">
@@ -46,10 +46,20 @@
   </view>
 
   <view class="station-list">
+    <view class="station-card card endpoint-card {{started ? 'done' : ''}}" bindtap="handleStartTap">
+      <view class="station-number">{{started ? '✓' : '起'}}</view>
+      <view class="station-copy"><text>起点</text><text>{{started ? '起点已打卡' : '扫描起点二维码'}}</text></view>
+      <view class="station-meta"><text>{{started ? 'DONE' : 'NEXT'}}</text><text>开始计时</text></view>
+    </view>
     <view wx:for="{{stations}}" wx:key="id" class="station-card card {{item.done ? 'done' : ''}} {{item.locked ? 'locked' : ''}}" data-index="{{index}}" bindtap="handleStationTap">
       <view class="station-number">{{item.done ? '✓' : item.number}}</view>
       <view class="station-copy"><text>{{item.title}}</text><text>{{item.location}} · {{item.tag}}</text></view>
       <view class="station-meta"><text>{{item.status}}</text><text>{{item.distance}}</text></view>
+    </view>
+    <view class="station-card card endpoint-card {{finished ? 'done' : ''}} {{completed < 3 ? 'locked' : ''}}" bindtap="handleFinishTap">
+      <view class="station-number">{{finished ? '✓' : '终'}}</view>
+      <view class="station-copy"><text>终点</text><text>{{finished ? '终点已打卡' : '三个任务点完成后扫码'}}</text></view>
+      <view class="station-meta"><text>{{finished ? 'DONE' : completed === 3 ? 'NEXT' : 'LOCKED'}}</text><text>结束计时</text></view>
     </view>
   </view>
 

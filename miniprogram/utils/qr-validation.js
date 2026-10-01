@@ -30,8 +30,12 @@ function parseQrPayload(value) {
   }
 }
 
-function validateQrResult({ expectedStationIndex, result, qrTags, observedAt = Date.now() }) {
-  if (!Number.isInteger(expectedStationIndex) || expectedStationIndex < 0) return rejected('NO_CURRENT_STATION')
+function validateQrResult({ expectedStationIndex, expectedCheckpointType, result, qrTags, observedAt = Date.now() }) {
+  const checkpointType = expectedCheckpointType || 'station'
+  if (checkpointType === 'station' && (!Number.isInteger(expectedStationIndex) || expectedStationIndex < 0)) {
+    return rejected('NO_CURRENT_STATION')
+  }
+  if (!['start', 'station', 'finish'].includes(checkpointType)) return rejected('NO_CURRENT_CHECKPOINT')
   const parsed = parseQrPayload(result)
   if (!parsed.ok) return parsed
   const matches = (Array.isArray(qrTags) ? qrTags : []).filter((item) => (
@@ -40,11 +44,14 @@ function validateQrResult({ expectedStationIndex, result, qrTags, observedAt = D
   if (!matches.length) return rejected('QR_UNKNOWN')
   if (matches.length !== 1) return rejected('QR_CONFIG_DUPLICATE')
   const item = matches[0]
-  if (item.stationIndex !== expectedStationIndex) return rejected('WRONG_POINT')
+  if (item.checkpointType !== checkpointType) return rejected('WRONG_POINT')
+  if (checkpointType === 'station' && item.stationIndex !== expectedStationIndex) return rejected('WRONG_POINT')
   return {
     ok: true,
     qrId: item.qrId,
     pointCode: item.pointCode,
+    checkpointType: item.checkpointType,
+    checkpointIndex: item.checkpointIndex,
     stationIndex: item.stationIndex,
     assurance: ASSURANCE.QR,
     observedAt

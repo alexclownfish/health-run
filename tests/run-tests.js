@@ -70,6 +70,7 @@ run('native map uses the GPX route and station marker order', () => {
   assert.equal(route.TRACK[0][0], 0, 'GPX start index')
   assert.deepEqual(route.TASK_TRACK_INDEX, [135, 151, 159])
   assert.deepEqual(route.getTaskMarkers().map((marker) => marker.sourceLabel), ['0', '3', '4'])
+  assert.deepEqual(route.getMapMarkers(0).map((marker) => marker.id), [0, 1, 2, 3, 4])
   assert.equal(route.TRACK.length, 243, 'full GPX geometry')
   assert.equal(route.getMapPoints().length, 243, 'converted GPX geometry')
   assert.match(source, /getMapPoints/, 'GCJ-02 map points')
@@ -95,17 +96,22 @@ run('progress state normalizes and caps safely', () => {
 
 run('strict station workflow rejects every skipped step', () => {
   const store = require(path.join(miniRoot, 'utils', 'progress.js'))
+  const { QR_TAGS } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
   const storage = {}
   global.wx = {
     getStorageSync: (key) => storage[key],
     setStorageSync: (key, value) => { storage[key] = value }
   }
   store.resetProgress()
+  const now = Date.now()
+  const start = store.startCheckIn({ qrId: 'QR-START-A', pointCode: '000', assurance: 'LOCAL_QR_MATCH', observedAt: now })
+  assert.equal(start.startedAt, now)
+  assert.equal(store.startCheckIn({ qrId: 'QR-START-A', pointCode: '000', assurance: 'LOCAL_QR_MATCH', observedAt: now + 1000 }).startedAt, now)
   store.checkInStation(1)
   store.startAction(0)
   store.completeStation(0, 'photo-a.jpg')
   assert.equal(store.readProgress().completed, 0)
-  store.checkInStation(0)
+  store.checkInStation(0, 'qr-code', { ...QR_TAGS[1], assurance: 'LOCAL_QR_MATCH', observedAt: now })
   store.completeStation(0, 'photo-a.jpg')
   assert.equal(store.readProgress().completed, 0)
   store.startAction(0)
@@ -117,24 +123,67 @@ run('strict station workflow rejects every skipped step', () => {
   store.completeStation(0, 'photo-a.jpg')
   assert.equal(store.readProgress().completed, 1)
 
-  store.checkInStation(1)
+  store.checkInStation(1, 'qr-code', { ...QR_TAGS[2], assurance: 'LOCAL_QR_MATCH', observedAt: now })
   store.startAction(1)
   store.completeAction(1)
   store.completeStation(1, 'photo-b.jpg')
   assert.equal(store.readProgress().completed, 2)
-  store.checkInStation(2)
+  store.checkInStation(2, 'qr-code', { ...QR_TAGS[3], assurance: 'LOCAL_QR_MATCH', observedAt: now })
   store.startAction(2)
   store.completeAction(2)
   store.completeStation(2, 'photo-c.jpg')
   assert.equal(store.readProgress().completed, 3)
-  assert.ok(store.readProgress().completedAt > 0)
+  assert.equal(store.readProgress().completedAt, 0)
+  assert.equal(store.isFinished(store.readProgress()), false)
+  const finished = store.finishCheckIn({ qrId: 'QR-FINISH-A', pointCode: '999', assurance: 'LOCAL_QR_MATCH', observedAt: now + 5000 })
+  assert.equal(finished.completedAt, now + 5000)
+  assert.equal(store.isFinished(finished), true)
   assert.equal(store.readProgress().history.length, 3)
+})
+
+run('start and finish checkpoints enforce the route boundaries', () => {
+  const store = require(path.join(miniRoot, 'utils', 'progress.js'))
+  const { QR_TAGS } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
+  const storage = {}
+  global.wx = {
+    getStorageSync: (key) => storage[key],
+    setStorageSync: (key, value) => { storage[key] = value }
+  }
+  store.resetProgress()
+  assert.equal(store.finishCheckIn({ ...QR_TAGS[4], assurance: 'LOCAL_QR_MATCH', observedAt: 2000 }).completedAt, 0)
+  assert.equal(store.checkInStation(0, 'qr-code', { ...QR_TAGS[1], assurance: 'LOCAL_QR_MATCH' }).completed, 0)
+  store.startCheckIn({ ...QR_TAGS[0], assurance: 'LOCAL_QR_MATCH', observedAt: 1000 })
+  assert.equal(store.startCheckIn({ ...QR_TAGS[0], assurance: 'LOCAL_QR_MATCH', observedAt: 900 }).startedAt, 1000)
+  assert.equal(store.finishCheckIn({ ...QR_TAGS[4], assurance: 'LOCAL_QR_MATCH', observedAt: 900 }).completedAt, 0)
+  assert.equal(store.isFinished(store.readProgress()), false)
+})
+
+run('current checkpoint transitions from start to stations to finish', () => {
+  const store = require(path.join(miniRoot, 'utils', 'progress.js'))
+  const { QR_TAGS } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
+  const storage = {}
+  global.wx = {
+    getStorageSync: (key) => storage[key],
+    setStorageSync: (key, value) => { storage[key] = value }
+  }
+  store.resetProgress()
+  assert.deepEqual(store.getCurrentCheckpoint(store.readProgress()), { type: 'start' })
+  store.startCheckIn({ ...QR_TAGS[0], assurance: 'LOCAL_QR_MATCH', observedAt: Date.now() })
+  assert.deepEqual(store.getCurrentCheckpoint(store.readProgress()), { type: 'station', stationIndex: 0 })
+  store.saveProgress({ ...store.readProgress(), completed: 3 })
+  assert.deepEqual(store.getCurrentCheckpoint(store.readProgress()), { type: 'finish' })
+  store.finishCheckIn({ ...QR_TAGS[4], assurance: 'LOCAL_QR_MATCH', observedAt: Date.now() })
+  assert.equal(store.getCurrentCheckpoint(store.readProgress()), null)
 })
 
 run('expired check-ins cannot start an action', () => {
   const store = require(path.join(miniRoot, 'utils', 'progress.js'))
   assert.equal(store.hasValidCheckIn({ checkins: { 0: { at: Date.now() - 21 * 60 * 1000 } } }, 0), false)
-  assert.equal(store.hasValidCheckIn({ checkins: { 0: { at: Date.now() } } }, 0), true)
+  assert.equal(store.hasValidCheckIn({
+    startedAt: 1,
+    startCheckIn: { qrId: 'QR-START-A', pointCode: '000', assurance: 'LOCAL_QR_MATCH' },
+    checkins: { 0: { at: Date.now(), source: 'qr-code', qrId: 'QR-001-A', pointCode: '001', assurance: 'LOCAL_QR_MATCH' } }
+  }, 0), true)
 })
 
 run('production check-in entry is manual and has no local skip', () => {
@@ -145,12 +194,12 @@ run('production check-in entry is manual and has no local skip', () => {
   assert.doesNotMatch(routeScript, /discoverOnce|checkInStation|nfc-skip/)
   assert.match(routeScript, /wx\.navigateTo\(\{ url: '\/pages\/checkin\/checkin' \}\)/)
   assert.doesNotMatch(routeTemplate, /跳过|自动打开|等待触碰现场标签|无需点击扫描/)
-  assert.match(routeTemplate, /打开打卡页/)
+  assert.match(routeTemplate, /扫描起点二维码|扫码打卡/)
 })
 
 run('packaged QR inventory is exact, unique, and non-URL', () => {
   const { QR_TAGS, getQrInventoryStatus } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
-  assert.equal(QR_TAGS.length, 3)
+  assert.equal(QR_TAGS.length, 5)
   assert.equal(new Set(QR_TAGS.map((item) => item.qrId)).size, QR_TAGS.length)
   assert.equal(new Set(QR_TAGS.map((item) => item.qrToken)).size, QR_TAGS.length)
   for (const item of QR_TAGS) {
@@ -158,20 +207,26 @@ run('packaged QR inventory is exact, unique, and non-URL', () => {
     assert.equal(item.payloadVersion, 1)
     assert.doesNotMatch(item.payload, /^https?:/i)
   }
+  assert.deepEqual(QR_TAGS.map((item) => item.checkpointType), ['start', 'station', 'station', 'station', 'finish'])
+  assert.deepEqual(QR_TAGS.map((item) => item.pointCode), ['000', '001', '002', '003', '999'])
   assert.equal(getQrInventoryStatus().releaseReady, true)
 })
 
 run('QR validation requires exact HRQ1 inventory and current point', () => {
   const validation = require(path.join(miniRoot, 'utils', 'qr-validation.js'))
   const { QR_TAGS } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
-  const accepted = validation.validateQrResult({ expectedStationIndex: 0, result: QR_TAGS[0].payload, qrTags: QR_TAGS, observedAt: 2 })
+  const accepted = validation.validateQrResult({ expectedStationIndex: 0, result: QR_TAGS[1].payload, qrTags: QR_TAGS, observedAt: 2 })
   assert.equal(accepted.ok, true)
   assert.equal(accepted.assurance, 'LOCAL_QR_MATCH')
   assert.equal(accepted.qrId, 'QR-001-A')
-  assert.equal(validation.validateQrResult({ expectedStationIndex: 0, result: QR_TAGS[1].payload, qrTags: QR_TAGS }).reasonCode, 'WRONG_POINT')
+  assert.equal(validation.validateQrResult({ expectedCheckpointType: 'start', result: QR_TAGS[0].payload, qrTags: QR_TAGS }).ok, true)
+  assert.equal(validation.validateQrResult({ expectedCheckpointType: 'finish', result: QR_TAGS[4].payload, qrTags: QR_TAGS }).ok, true)
+  assert.equal(validation.validateQrResult({ expectedCheckpointType: 'start', result: QR_TAGS[1].payload, qrTags: QR_TAGS }).reasonCode, 'WRONG_POINT')
+  assert.equal(validation.validateQrResult({ expectedCheckpointType: 'finish', result: QR_TAGS[3].payload, qrTags: QR_TAGS }).reasonCode, 'WRONG_POINT')
+  assert.equal(validation.validateQrResult({ expectedStationIndex: 0, result: QR_TAGS[2].payload, qrTags: QR_TAGS }).reasonCode, 'WRONG_POINT')
   assert.equal(validation.validateQrResult({ expectedStationIndex: 0, result: 'https://example.com', qrTags: QR_TAGS }).reasonCode, 'QR_INVALID')
   assert.equal(validation.validateQrResult({ expectedStationIndex: 0, result: 'HRQ1|001|QR-001-A|unknown-token-value-1234', qrTags: QR_TAGS }).reasonCode, 'QR_UNKNOWN')
-  assert.equal(validation.validateQrResult({ expectedStationIndex: 0, result: QR_TAGS[0].payload, qrTags: [QR_TAGS[0], { ...QR_TAGS[0], qrId: 'QR-DUP' }] }).reasonCode, 'QR_CONFIG_DUPLICATE')
+  assert.equal(validation.validateQrResult({ expectedStationIndex: 0, result: QR_TAGS[1].payload, qrTags: [QR_TAGS[1], { ...QR_TAGS[1], qrId: 'QR-DUP' }] }).reasonCode, 'QR_CONFIG_DUPLICATE')
   assert.equal(validation.normalizeScanError({ errMsg: 'scanCode:fail cancel' }).reasonCode, 'QR_CANCELLED')
   assert.equal(validation.normalizeScanError({ errMsg: 'scanCode:fail auth deny' }).reasonCode, 'CAMERA_DENIED')
   assert.equal(validation.normalizeScanError({ errMsg: 'scanCode:fail unavailable' }).reasonCode, 'QR_SCAN_FAILED')
@@ -185,6 +240,7 @@ run('validated QR metadata is local, minimized, ordered, and not overwritten', (
     setStorageSync: (key, value) => { storage[key] = value }
   }
   store.resetProgress()
+  store.startCheckIn({ qrId: 'QR-START-A', pointCode: '000', assurance: 'LOCAL_QR_MATCH', observedAt: 1 })
   store.checkInStation(1, 'qr-code', { qrId: 'FUTURE' })
   assert.equal(store.readProgress().checkins['1'], undefined)
   const qr = store.checkInStation(0, 'qr-code', {
@@ -210,6 +266,7 @@ run('a QR check-in repairs a legacy NFC-only local record', () => {
   store.saveProgress({
     completed: 0,
     startedAt: 1,
+    startCheckIn: { at: 1, source: 'qr-code', qrId: 'QR-START-A', pointCode: '000', assurance: 'LOCAL_QR_MATCH' },
     checkins: { 0: { at: 2, source: 'nfc' } },
     actions: {},
     photos: {},
@@ -330,6 +387,73 @@ run('calendar uses real month boundaries and activity dates', () => {
   assert.equal(calendar.monthLabel, '2026.08')
   assert.equal(calendar.cells.find((cell) => cell.day === 5).active, true)
   assert.equal(calendar.cells.length % 7, 0)
+})
+
+run('completion certificate formats local duration without ranking or distance', () => {
+  const format = require(path.join(miniRoot, 'utils', 'format.js'))
+  assert.equal(format.formatDuration(1000, 3723000), '01:02:02')
+  assert.equal(format.formatDuration(0, 3723000), '--')
+  assert.equal(format.formatDuration(4000, 3000), '--')
+  assert.equal(format.formatDuration(1000, 1000), '00:00:00')
+  assert.equal(format.formatDuration(1000, 1000999), '00:16:39')
+  assert.equal(format.formatDuration(1000, 86401000), '24:00:00')
+  assert.equal(format.formatDuration(Infinity, Infinity), '--')
+  assert.equal(format.formatDuration(-1000, 3000), '--')
+  assert.equal(format.formatDuration('invalid', 3000), '--')
+
+  const certificateScript = fs.readFileSync(path.join(miniRoot, 'pages', 'certificate', 'certificate.js'), 'utf8')
+  const certificateTemplate = fs.readFileSync(path.join(miniRoot, 'pages', 'certificate', 'certificate.wxml'), 'utf8')
+  assert.match(certificateScript, /formatDuration\(progress\.startedAt, progress\.completedAt\)/)
+  assert.match(certificateScript, /总用时/)
+  assert.doesNotMatch(certificateScript, /排名|rankLabel|路程|1\.56|待统计/)
+  assert.match(certificateTemplate, /\{\{completionDuration\}\}/)
+  assert.doesNotMatch(certificateTemplate, /排名|rankLabel|路程|1\.56 km/)
+  assert.match(certificateTemplate, /完成时间/)
+  assert.match(certificateTemplate, /总用时/)
+})
+
+run('certificate refresh and saved poster use fixed device-local completion times', () => {
+  const store = require(path.join(miniRoot, 'utils', 'progress.js'))
+  const user = require(path.join(miniRoot, 'utils', 'user.js'))
+  const file = path.join(miniRoot, 'pages', 'certificate', 'certificate.js')
+  const previousPage = global.Page
+  const readProgress = store.readProgress
+  const readUser = user.readUser
+  let definition
+  try {
+    global.Page = (page) => { definition = page }
+    delete require.cache[require.resolve(file)]
+    require(file)
+    store.readProgress = () => ({
+      completed: 3,
+      startedAt: 1000,
+      completedAt: 1123000,
+      startCheckIn: { qrId: 'QR-START-A', pointCode: '000', assurance: 'LOCAL_QR_MATCH' },
+      finishCheckIn: { qrId: 'QR-FINISH-A', pointCode: '999', assurance: 'LOCAL_QR_MATCH' }
+    })
+    user.readUser = () => ({ nickName: '测试用户' })
+    const page = { ...definition, data: { ...definition.data }, setData(update) { Object.assign(this.data, update) } }
+    page.refreshCertificate()
+    assert.equal(page.data.completionDuration, '00:18:42')
+    page.refreshCertificate()
+    assert.equal(page.data.completionDuration, '00:18:42')
+    assert.equal(page.data.certificateReady, true)
+    const texts = []
+    const context = new Proxy({ fillText: (text) => texts.push(text) }, {
+      get(target, key) { return key in target ? target[key] : () => {} }
+    })
+    page.drawCertificatePoster(context)
+    assert.ok(texts.some((text) => text.includes('完成时间') && text.includes('总用时 00:18:42')))
+    assert.doesNotMatch(texts.join('\n'), /排名|路程|1\.56|待统计/)
+    store.readProgress = () => ({ completed: 3, startedAt: 0, completedAt: 1123000 })
+    page.refreshCertificate()
+    assert.equal(page.data.completionDuration, '--')
+  } finally {
+    store.readProgress = readProgress
+    user.readUser = readUser
+    global.Page = previousPage
+    delete require.cache[require.resolve(file)]
+  }
 })
 
 run('wxml has balanced view/block tags', () => {

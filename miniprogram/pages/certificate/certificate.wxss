@@ -19,8 +19,9 @@
 .station-dot { width: 39rpx; height: 39rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--ink); background: var(--yellow); font-family: monospace; font-size: 16rpx; }
 .certificate-stations > view > text:last-child { color: var(--deep); font-size: 16rpx; font-weight: 700; }
 .certificate-note { display: block; margin: 33rpx 0 15rpx; color: var(--muted); font-size: 17rpx; }
-.certificate-meta { display: flex; justify-content: center; gap: 28rpx; color: var(--deep); font-size: 18rpx; }
-.certificate-meta > text > text { font-weight: 700; }
+.certificate-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; color: var(--deep); font-size: 18rpx; }
+.certificate-meta > text { min-width: 0; }
+.certificate-meta > text > text { display: block; margin-top: 8rpx; overflow-wrap: anywhere; font-family: monospace; font-size: 26rpx; font-weight: 700; }
 .certificate-footer { margin-top: 29rpx; padding-top: 22rpx; border-top: 1rpx solid var(--line); color: #958b91; font-size: 14rpx; }
 .certificate-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; margin-top: 20rpx; }
 .back-home { margin-top: 18rpx; }

@@ -11,7 +11,8 @@ const REASON_CONTENT = {
   QR_SCAN_FAILED: ['扫码启动失败', '请检查相机权限后重新尝试。'],
   QR_INVALID: ['二维码格式无效', '请扫描活动标牌上的点位二维码。'],
   QR_UNKNOWN: ['二维码未登记', '这个二维码不在本次活动清单中。'],
-  QR_CONFIG_DUPLICATE: ['二维码配置冲突', '活动二维码清单存在重复配置，请联系现场工作人员。']
+  QR_CONFIG_DUPLICATE: ['二维码配置冲突', '活动二维码清单存在重复配置，请联系现场工作人员。'],
+  NO_CURRENT_CHECKPOINT: ['暂无可打卡检查点', '请返回路线页查看当前流程。']
 }
 
 Page({
@@ -20,6 +21,7 @@ Page({
     statusLabel: '正在准备',
     title: '正在读取当前点位',
     message: '请保持页面打开。',
+    checkpointLabel: 'LOCAL CHECK IN',
     station: null,
     showPrimary: false,
     showRetry: false,
@@ -73,16 +75,53 @@ Page({
   initializeContext() {
     this.stopPending()
     const progress = progressStore.readProgress()
-    if (!Number.isInteger(progress.completed) || progress.completed < 0 || progress.completed >= stations.length) {
+    const checkpoint = progressStore.getCurrentCheckpoint(progress)
+    this.expectedStationIndex = null
+    if (checkpoint && checkpoint.type === 'start') {
+      this.expectedCheckpointType = 'start'
+      this.setData({
+        state: 'IDLE_QR',
+        statusLabel: '等待出发',
+        checkpointLabel: 'START / 起点',
+        title: '扫描起点二维码',
+        message: '扫描起点二维码后开始计时，再前往第一个任务点。',
+        station: null,
+        showPrimary: true,
+        showRetry: false,
+        showRoute: true,
+        success: false
+      })
+      return
+    }
+    if (checkpoint && checkpoint.type === 'finish') {
+      this.expectedCheckpointType = 'finish'
+      this.setData({
+        state: 'IDLE_QR',
+        statusLabel: '等待结束',
+        checkpointLabel: 'FINISH / 终点',
+        title: '扫描终点二维码',
+        message: '三个任务点已完成，扫描终点二维码结束计时。',
+        station: null,
+        showPrimary: true,
+        showRetry: false,
+        showRoute: true,
+        success: false
+      })
+      return
+    }
+    if (!checkpoint || checkpoint.type !== 'station') {
+      this.expectedCheckpointType = null
       this.expectedStationIndex = null
       this.showRejected('NO_CURRENT_STATION', false)
       return
     }
 
+    this.expectedCheckpointType = 'station'
     this.expectedStationIndex = progress.completed
     this.setData({
       state: 'IDLE_QR',
       statusLabel: '等待开始',
+      checkpointLabel: `POINT ${stations[this.expectedStationIndex].id} / ${stations[this.expectedStationIndex].location}`,
       title: `${stations[this.expectedStationIndex].title} · 扫码打卡`,
       message: '点击扫码后，对准现场标牌上的点位二维码。',
       station: stations[this.expectedStationIndex],
@@ -96,7 +135,8 @@ Page({
   startQrScan() {
     if (this.accepted || this.qrScanActive || this.pageUnloaded || !this.pageActive) return
     this.initializeContext()
-    if (!Number.isInteger(this.expectedStationIndex)) return
+    if (this.expectedCheckpointType === 'station' && !Number.isInteger(this.expectedStationIndex)) return
+    if (!this.expectedCheckpointType) return
     if (typeof wx.scanCode !== 'function') {
       this.showRejected('QR_SCAN_FAILED', true)
       return
@@ -107,8 +147,16 @@ Page({
     this.setData({
       state: 'SCANNING_QR',
       statusLabel: '打开相机',
-      title: `点位 ${this.expectedStationIndex + 1} · 扫描二维码`,
-      message: '请对准现场标牌上的点位二维码。',
+      title: this.expectedCheckpointType === 'start'
+        ? '起点 · 扫描二维码'
+        : this.expectedCheckpointType === 'finish'
+          ? '终点 · 扫描二维码'
+          : `点位 ${this.expectedStationIndex + 1} · 扫描二维码`,
+      message: this.expectedCheckpointType === 'start'
+        ? '请对准起点标牌上的二维码。'
+        : this.expectedCheckpointType === 'finish'
+          ? '请对准终点标牌上的二维码。'
+          : '请对准现场标牌上的点位二维码。',
       showPrimary: false,
       showRetry: false,
       showRoute: false,
@@ -128,6 +176,7 @@ Page({
           if (!this.finishQrScan(attemptId)) return
           this.handleValidationResult(qrValidation.validateQrResult({
             expectedStationIndex: this.expectedStationIndex,
+            expectedCheckpointType: this.expectedCheckpointType,
             result,
             qrTags: QR_TAGS
           }), attemptId)
@@ -154,22 +203,49 @@ Page({
       return
     }
 
-    const progress = progressStore.checkInStation(result.stationIndex, 'qr-code', result)
-    const checkIn = progress.checkins[String(result.stationIndex)]
-    const identityMatches = checkIn && checkIn.qrId === result.qrId
+    const checkpoint = progressStore.getCurrentCheckpoint(progressStore.readProgress())
+    if (!checkpoint || checkpoint.type !== result.checkpointType ||
+      (checkpoint.type === 'station' && checkpoint.stationIndex !== result.stationIndex)) {
+      this.showRejected('WRONG_POINT', false)
+      return
+    }
+
+    let progress
+    let identityMatches = false
+    if (result.checkpointType === 'start') {
+      progress = progressStore.startCheckIn(result)
+      identityMatches = progress.startCheckIn && progress.startCheckIn.qrId === result.qrId
+    } else if (result.checkpointType === 'finish') {
+      progress = progressStore.finishCheckIn(result)
+      identityMatches = progress.finishCheckIn && progress.finishCheckIn.qrId === result.qrId
+    } else {
+      progress = progressStore.checkInStation(result.stationIndex, 'qr-code', result)
+      const checkIn = progress.checkins[String(result.stationIndex)]
+      identityMatches = checkIn && checkIn.qrId === result.qrId
+    }
     if (!identityMatches) {
       this.showRejected('WRONG_POINT', false)
       return
     }
 
     this.accepted = true
+    this.acceptedCheckpointType = result.checkpointType
     this.acceptedStationIndex = result.stationIndex
     this.stopPending()
     this.setData({
       state: 'ACCEPTED',
-      statusLabel: '二维码已核对',
-      title: `${stations[result.stationIndex].title} · 打卡成功`,
-      message: '点位二维码一致，即将进入动作任务。',
+      statusLabel: result.checkpointType === 'start' ? '起点已核对' : result.checkpointType === 'finish' ? '终点已核对' : '二维码已核对',
+      checkpointLabel: result.checkpointType === 'start' ? 'START / 起点' : result.checkpointType === 'finish' ? 'FINISH / 终点' : this.data.checkpointLabel,
+      title: result.checkpointType === 'start'
+        ? '起点打卡成功'
+        : result.checkpointType === 'finish'
+          ? '终点打卡成功'
+          : `${stations[result.stationIndex].title} · 打卡成功`,
+      message: result.checkpointType === 'start'
+        ? '计时已开始，即将返回路线页。'
+        : result.checkpointType === 'finish'
+          ? '计时已结束，即将生成完赛凭证。'
+          : '点位二维码一致，即将进入动作任务。',
       showPrimary: false,
       showRetry: false,
       showRoute: false,
@@ -184,7 +260,13 @@ Page({
     this.navigationTimer = setTimeout(() => {
       this.navigationTimer = null
       if (!this.pageActive || !this.accepted) return
-      wx.redirectTo({ url: `/pages/action/action?station=${this.acceptedStationIndex}` })
+      if (this.acceptedCheckpointType === 'start') {
+        wx.switchTab({ url: '/pages/route/route' })
+      } else if (this.acceptedCheckpointType === 'finish') {
+        wx.redirectTo({ url: '/pages/certificate/certificate' })
+      } else {
+        wx.redirectTo({ url: `/pages/action/action?station=${this.acceptedStationIndex}` })
+      }
     }, 700)
   },
 

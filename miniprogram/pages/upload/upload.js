@@ -87,7 +87,7 @@ Page({
         completed: progress.completed,
         successProgress: Math.round(progress.completed / 3 * 100),
         storageNotice: '照片已保存在当前设备',
-        continueLabel: progress.completed === 3 ? '生成完赛凭证' : '查看下一站'
+        continueLabel: progress.completed === 3 ? '前往终点扫码' : '查看下一站'
       })
       wx.vibrateShort({ type: 'medium' })
       })
@@ -108,7 +108,7 @@ Page({
 
   continueRoute() {
     if (this.data.completed === 3) {
-      wx.redirectTo({ url: '/pages/certificate/certificate' })
+      wx.redirectTo({ url: '/pages/checkin/checkin' })
       return
     }
     wx.switchTab({ url: '/pages/route/route' })

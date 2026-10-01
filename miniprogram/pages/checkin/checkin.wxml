@@ -15,8 +15,7 @@
   </view>
 
   <view class="result-copy">
-    <text wx:if="{{station}}" class="eyebrow">POINT {{station.id}} / {{station.location}}</text>
-    <text wx:else class="eyebrow">LOCAL CHECK IN</text>
+    <text class="eyebrow">{{checkpointLabel}}</text>
     <text class="result-title">{{title}}</text>
     <text class="result-message">{{message}}</text>
   </view>

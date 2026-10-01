@@ -4,7 +4,7 @@
       <view class="decor decor-one"></view><view class="decor decor-two"></view>
       <text class="certificate-code mono">PATCH COMPLETE / RELEASE</text>
       <text class="certificate-title">午间漫步 · 健康同行</text>
-      <text class="certificate-subtitle">完成约 1.56 公里实景健康路线</text>
+      <text class="certificate-subtitle">完成实景健康路线</text>
       <view class="complete-seal">✓</view>
     </view>
     <view class="certificate-body">
@@ -19,7 +19,10 @@
         </view>
       </view>
       <text class="certificate-note">回到起点 · 能量已释放</text>
-      <view class="certificate-meta"><text>完成时间 <text>{{completedTime}}</text></text><text>路程 <text>1.56 km</text></text></view>
+      <view class="certificate-meta">
+        <text>完成时间 <text>{{completedTime}}</text></text>
+        <text>总用时 <text>{{completionDuration}}</text></text>
+      </view>
       <view class="certificate-footer mono">HEALTH STATUS: RELEASED ✓</view>
     </view>
   </view>
@@ -27,7 +30,7 @@
   <view wx:else class="empty-certificate card">
     <view class="empty-icon">⌁</view>
     <text>凭证还在路上</text>
-    <text>完成 3 个健康点位后，即可生成专属完赛凭证。</text>
+    <text>扫描起点、完成 3 个健康点位并扫描终点后，即可生成专属完赛凭证。</text>
   </view>
 
   <view class="certificate-actions" wx:if="{{certificateReady}}">

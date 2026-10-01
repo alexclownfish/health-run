@@ -47,7 +47,7 @@ Component({
 
     handleMarkerTap(event) {
       const id = Number(event.detail && event.detail.markerId)
-      if (!id) return
+      if (!id || id > 3) return
       this.triggerEvent('stationtap', { index: id - 1 })
     },
 

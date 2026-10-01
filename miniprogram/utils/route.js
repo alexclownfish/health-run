@@ -119,6 +119,23 @@ function getMapMarkers(completed = 0) {
       } : undefined
     })
   })
+  const finishPoint = points[points.length - 1]
+  markers.push({
+    id: 4,
+    ...finishPoint,
+    label: {
+      content: 'F',
+      color: '#ffffff',
+      fontSize: 12,
+      bgColor: '#3f4b9f',
+      borderColor: '#ffffff',
+      borderWidth: 2,
+      borderRadius: 24,
+      padding: 7,
+      anchorX: -12,
+      anchorY: -24
+    }
+  })
   return markers
 }
 

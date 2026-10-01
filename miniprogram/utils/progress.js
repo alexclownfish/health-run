@@ -1,4 +1,6 @@
-const KEY = 'patchwalk-progress-v2'
+// Old route times did not come from start/finish scans; keep that storage untouched.
+const KEY = 'patchwalk-progress-v3'
+const { QR_TAGS } = require('./qr-tags')
 const routeData = require('./route')
 const ROUTE_DISTANCE = routeData.TASK_DISTANCE_KM
 
@@ -7,6 +9,8 @@ function defaultProgress() {
     completed: 0,
     startedAt: 0,
     completedAt: 0,
+    startCheckIn: null,
+    finishCheckIn: null,
     checkins: {},
     actions: {},
     photos: {},
@@ -18,12 +22,14 @@ function defaultProgress() {
 function normalizeProgress(value) {
   const source = value && typeof value === 'object' ? value : {}
   const completed = Number.isFinite(Number(source.completed))
-    ? Math.min(Math.max(Number(source.completed), 0), 3)
+    ? Math.min(Math.max(Math.floor(Number(source.completed)), 0), 3)
     : 0
   return {
     completed,
     startedAt: Number(source.startedAt) || 0,
     completedAt: Number(source.completedAt) || 0,
+    startCheckIn: source.startCheckIn && typeof source.startCheckIn === 'object' ? source.startCheckIn : null,
+    finishCheckIn: source.finishCheckIn && typeof source.finishCheckIn === 'object' ? source.finishCheckIn : null,
     checkins: source.checkins && typeof source.checkins === 'object' ? source.checkins : {},
     actions: source.actions && typeof source.actions === 'object' ? source.actions : {},
     photos: source.photos && typeof source.photos === 'object' ? source.photos : {},
@@ -51,27 +57,53 @@ function ensureProgress() {
   return saveProgress(current)
 }
 
-function startRoute() {
+function matchesCheckpoint(metadata, type, stationIndex) {
+  return Boolean(metadata && metadata.assurance === 'LOCAL_QR_MATCH' && QR_TAGS.some((item) => (
+    item.enabled !== false && item.checkpointType === type &&
+    (type !== 'station' || item.stationIndex === stationIndex) &&
+    item.qrId === metadata.qrId && item.pointCode === metadata.pointCode
+  )))
+}
+
+function checkpointEvidence(metadata, fallbackAt = Date.now()) {
+  const evidence = metadata && typeof metadata === 'object' ? metadata : {}
+  return {
+    at: Number.isFinite(Number(evidence.observedAt)) && Number(evidence.observedAt) > 0
+      ? Number(evidence.observedAt) : fallbackAt,
+    source: 'qr-code',
+    qrId: typeof evidence.qrId === 'string' ? evidence.qrId : '',
+    pointCode: typeof evidence.pointCode === 'string' ? evidence.pointCode : '',
+    assurance: typeof evidence.assurance === 'string' ? evidence.assurance : 'LOCAL_QR_MATCH'
+  }
+}
+
+function startCheckIn(metadata = {}) {
   const current = readProgress()
-  if (!current.startedAt) current.startedAt = Date.now()
+  if (!matchesCheckpoint(metadata, 'start')) return current
+  if (current.startedAt || current.completed > 0 || current.completedAt) return current
+  const evidence = checkpointEvidence(metadata)
+  current.startedAt = evidence.at
+  current.startCheckIn = evidence
   return saveProgress(current)
 }
 
 function checkInStation(index, source = 'qr-code', metadata = {}) {
-  const current = startRoute()
-  const safeIndex = Math.min(Math.max(Number(index) || 0, 0), 2)
-  if (safeIndex !== current.completed) return current
+  const current = readProgress()
+  const safeIndex = Number(index)
+  if (!Number.isInteger(safeIndex) || safeIndex < 0 || safeIndex > 2 ||
+    source !== 'qr-code' || !matchesCheckpoint(metadata, 'station', safeIndex) ||
+    !current.startCheckIn || !current.startedAt || safeIndex !== current.completed || current.completedAt) return current
   const key = String(safeIndex)
-  const evidence = metadata && typeof metadata === 'object' ? metadata : {}
+  const evidence = checkpointEvidence({ ...metadata, source })
   const existing = current.checkins[key]
   const existingQrVerified = existing && existing.at &&
     existing.source === 'qr-code' &&
     typeof existing.qrId === 'string' && existing.qrId &&
     typeof existing.pointCode === 'string' && existing.pointCode &&
     existing.assurance === 'LOCAL_QR_MATCH'
-  if (existingQrVerified) return current
+  if (existingQrVerified && hasValidCheckIn(current, safeIndex)) return current
   current.checkins[key] = {
-    at: Date.now(),
+    at: evidence.at,
     source,
     qrId: typeof evidence.qrId === 'string' ? evidence.qrId : '',
     pointCode: typeof evidence.pointCode === 'string' ? evidence.pointCode : '',
@@ -80,10 +112,38 @@ function checkInStation(index, source = 'qr-code', metadata = {}) {
   return saveProgress(current)
 }
 
+function finishCheckIn(metadata = {}) {
+  const current = readProgress()
+  if (!matchesCheckpoint(metadata, 'finish') || !current.startCheckIn ||
+    !current.startedAt || current.completed !== 3 || current.completedAt) return current
+  const evidence = checkpointEvidence(metadata)
+  if (evidence.at < current.startedAt) return current
+  current.completedAt = evidence.at
+  current.finishCheckIn = evidence
+  return saveProgress(current)
+}
+
+function isFinished(value) {
+  const current = normalizeProgress(value)
+  return current.completed === 3 && current.startedAt > 0 && current.completedAt >= current.startedAt &&
+    matchesCheckpoint(current.startCheckIn, 'start') && matchesCheckpoint(current.finishCheckIn, 'finish')
+}
+
+function getCurrentCheckpoint(value) {
+  const current = normalizeProgress(value)
+  if (!current.startedAt || !matchesCheckpoint(current.startCheckIn, 'start')) return { type: 'start' }
+  if (isFinished(current)) return null
+  if (current.completed === 3) return { type: 'finish' }
+  return { type: 'station', stationIndex: current.completed }
+}
+
 function hasValidCheckIn(value, index, ttl = 20 * 60 * 1000) {
   const current = normalizeProgress(value)
   const record = current.checkins[String(index)]
-  return Boolean(record && record.at && Date.now() - record.at <= ttl)
+  const elapsed = record ? Date.now() - record.at : -1
+  return Boolean(current.startedAt && current.startCheckIn && !current.completedAt &&
+    record && record.source === 'qr-code' && matchesCheckpoint(record, 'station', Number(index)) &&
+    record.at && elapsed >= 0 && elapsed <= ttl)
 }
 
 function startAction(index) {
@@ -110,7 +170,8 @@ function completeAction(index) {
 function canUpload(value, index) {
   const current = normalizeProgress(value)
   const action = current.actions[String(index)]
-  return Number(index) === current.completed && Boolean(action && action.completedAt)
+  return Boolean(current.startedAt && current.startCheckIn && !current.completedAt &&
+    Number(index) === current.completed && action && action.completedAt)
 }
 
 function completeStation(index, photoPath) {
@@ -121,7 +182,6 @@ function completeStation(index, photoPath) {
   current.completed += 1
   current.checkins[String(safeIndex)] = { ...current.checkins[String(safeIndex)], completedAt: Date.now() }
   const completedAt = Date.now()
-  if (current.completed === 3) current.completedAt = completedAt
   current.history.push({
     routeId: current.routeId,
     station: safeIndex + 1,
@@ -164,8 +224,11 @@ module.exports = {
   readProgress,
   saveProgress,
   ensureProgress,
-  startRoute,
+  startCheckIn,
   checkInStation,
+  finishCheckIn,
+  isFinished,
+  getCurrentCheckpoint,
   hasValidCheckIn,
   startAction,
   completeAction,

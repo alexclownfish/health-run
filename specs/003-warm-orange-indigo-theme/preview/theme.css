@@ -66,12 +66,13 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
 /* Native custom elements have no UA layout; explicit source display rules win. */
 .snapshot .route-heading,.snapshot .profile-dot,.snapshot .weather-symbol,.snapshot .challenge,.snapshot .route-card-head,.snapshot .map-hint,.snapshot .section-head,
 .snapshot .station-number,.snapshot .reader,.snapshot .reader-phone,.snapshot .reader-tag,.snapshot .status-line,.snapshot .checkpoint-bar,.snapshot .checkpoint-bar > view,
-.snapshot .motion-card,.snapshot .timer-card,.snapshot .privacy-row,.snapshot .checkbox,.snapshot .success-mark,.snapshot .certificate-meta,.snapshot .complete-seal,
+.snapshot .motion-card,.snapshot .timer-card,.snapshot .privacy-row,.snapshot .checkbox,.snapshot .success-mark,.snapshot .complete-seal,
 .snapshot .week-summary,.snapshot .energy-ring,.snapshot .energy-ring view,.snapshot .calendar-nav,.snapshot .day-cell,.snapshot .history-date,.snapshot .profile-hero,
 .snapshot .profile-avatar,.snapshot .level-head,.snapshot .level-foot,.snapshot .badge,.snapshot .setting-icon { display: flex; }
 .snapshot .weather,.snapshot .station-card,.snapshot .checkin-actions,.snapshot .safety-card,.snapshot .camera-prompt,.snapshot .photo-tips,.snapshot .assurance-note,
 .snapshot .certificate-stations,.snapshot .certificate-stations > view,.snapshot .certificate-actions,.snapshot .metric-grid,.snapshot .week-labels,.snapshot .week-days,
 .snapshot .history-item,.snapshot .badge-grid,.snapshot .settings-list > view { display: grid; }
+.snapshot .certificate-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .snapshot .eyebrow,.snapshot .section-kicker,.snapshot .section-title,.snapshot .route-heading .page-title,.snapshot .page-title,.snapshot .challenge-code,
 .snapshot .challenge-title,.snapshot .challenge-desc,.snapshot .challenge-time text,.snapshot .weather-copy text,.snapshot .weather-score text,
 .snapshot .route-card-title,.snapshot .station-copy text,.snapshot .station-meta text,.snapshot .result-title,.snapshot .result-message,

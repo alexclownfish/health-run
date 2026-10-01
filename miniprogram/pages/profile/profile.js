@@ -26,8 +26,8 @@ Page({
       completed: progress.completed,
       badges: [
         { icon: '♙', title: '初次出发', color: 'orange', unlocked: progress.history.length > 0 },
-        { icon: 'ϟ', title: '能量满格', color: 'blue', unlocked: progress.completed === 3 },
-        { icon: '☀', title: '完整路线', color: 'coral', unlocked: progress.completed === 3 }
+        { icon: 'ϟ', title: '能量满格', color: 'blue', unlocked: progressStore.isFinished(progress) },
+        { icon: '☀', title: '完整路线', color: 'coral', unlocked: progressStore.isFinished(progress) }
       ]
     })
   },
@@ -80,7 +80,7 @@ Page({
   showHelp() {
     wx.showModal({
       title: '打卡流程',
-      content: '到达点位后打开打卡页扫码，点击开始动作并完成计时，再拍照上传。只有照片上传成功后才会解锁下一站。',
+      content: '先扫描起点开始计时，再依次扫描三个任务点、完成动作并拍照上传；最后扫描终点结束计时并生成凭证。',
       showCancel: false,
       confirmColor: '#5664C2'
     })
