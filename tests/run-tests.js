@@ -2,6 +2,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const { execFileSync } = require('node:child_process')
+const vm = require('node:vm')
 
 const root = path.resolve(__dirname, '..')
 const miniRoot = path.join(root, 'miniprogram')
@@ -49,6 +50,49 @@ run('all app and page javascript parses', () => {
   for (const file of files) execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' })
 })
 
+run('app and route page initialize with a JS-only mini-program module loader', () => {
+  const cache = new Map()
+  const storage = {}
+  let app
+  let page
+  const api = {
+    getStorageSync: (key) => storage[key],
+    setStorageSync: (key, value) => { storage[key] = value }
+  }
+  // Mirror the reported runtime: JSON requires resolve to .json.js, never Node's JSON loader.
+  function loadModule(file) {
+    const resolved = file.endsWith('.js') ? file : `${file}.js`
+    assert.ok(resolved.startsWith(miniRoot + path.sep), 'modules stay inside the package')
+    assert.ok(fs.existsSync(resolved), `mini-program module not found: ${path.relative(miniRoot, resolved)}`)
+    if (cache.has(resolved)) return cache.get(resolved).exports
+    const module = { exports: {} }
+    cache.set(resolved, module)
+    const context = {
+      module, exports: module.exports, wx: api,
+      App: (value) => { app = value },
+      Page: (value) => { page = value },
+      require: (request) => {
+        assert.ok(request.startsWith('.'), 'no Node modules in the mini-program runtime')
+        return loadModule(path.resolve(path.dirname(resolved), request))
+      }
+    }
+    vm.runInNewContext(fs.readFileSync(resolved, 'utf8'), context, { filename: resolved })
+    return module.exports
+  }
+  loadModule(path.join(miniRoot, 'app.js'))
+  assert.ok(app && typeof app.onLaunch === 'function', 'app registered')
+  app.onLaunch.call(app)
+  assert.equal(app.globalData.routeId, 'route-20261011')
+  loadModule(path.join(miniRoot, 'pages', 'route', 'route.js'))
+  assert.ok(page && typeof page.onLoad === 'function', 'route page registered')
+  page.setData = (value) => Object.assign(page.data, value)
+  page.onLoad.call(page)
+  assert.equal(page.data.totalDistance, '1.66')
+  assert.equal(page.data.stations.length, 3)
+  assert.equal(page.data.started, false)
+  assert.equal(page.data.profileVisible, true)
+})
+
 run('route map and profile authorization components are registered', () => {
   for (const component of components) {
     for (const extension of ['js', 'json', 'wxml', 'wxss']) {
@@ -63,21 +107,76 @@ run('route map and profile authorization components are registered', () => {
   assert.equal(profile.usingComponents['profile-auth'], '/components/profile-auth/profile-auth')
 })
 
-run('native map uses the GPX route and station marker order', () => {
+run('native map uses the KMZ route and station marker order', () => {
   const source = fs.readFileSync(path.join(miniRoot, 'components', 'route-map', 'route-map.js'), 'utf8')
   const template = fs.readFileSync(path.join(miniRoot, 'components', 'route-map', 'route-map.wxml'), 'utf8')
   const route = require(path.join(miniRoot, 'utils', 'route.js'))
-  assert.equal(route.TRACK[0][0], 0, 'GPX start index')
-  assert.deepEqual(route.TASK_TRACK_INDEX, [135, 151, 159])
-  assert.deepEqual(route.getTaskMarkers().map((marker) => marker.sourceLabel), ['0', '3', '4'])
+  assert.equal(route.TRACK[0][0], 0, 'KML start index')
+  assert.deepEqual(route.TASK_TRACK_INDEX, [70, 180, 227])
+  assert.deepEqual(route.getTaskMarkers().map((marker) => marker.sourceLabel), ['1', '2', '3'])
   assert.deepEqual(route.getMapMarkers(0).map((marker) => marker.id), [0, 1, 2, 3, 4])
-  assert.equal(route.TRACK.length, 243, 'full GPX geometry')
-  assert.equal(route.getMapPoints().length, 243, 'converted GPX geometry')
+  assert.equal(route.TRACK.length, 357, 'full KML geometry')
+  assert.equal(route.getMapPoints().length, 357, 'converted KML geometry')
   assert.match(source, /getMapPoints/, 'GCJ-02 map points')
   assert.match(source, /getMapMarkers/, 'native map markers')
   assert.match(template, /<map/, 'native WeChat map')
-  assert.match(template, /polyline="\{\{polyline\}\}"/, 'GPX polyline binding')
+  assert.match(template, /polyline="\{\{polyline\}\}"/, 'KML polyline binding')
   assert.match(template, /show-location="\{\{false\}\}"/, 'location permission is disabled')
+})
+
+run('KMZ segments and exact photo checkpoints survive map conversion', () => {
+  const route = require(path.join(miniRoot, 'utils', 'route.js'))
+  const segments = route.getMapSegments()
+  assert.deepEqual(segments.map((segment) => segment.length), [67, 290])
+  assert.deepEqual(segments.flat(), route.getMapPoints())
+  assert.notDeepEqual(segments[0].at(-1), segments[1][0], 'recording gap is not filled')
+  const coordinates = [[31.220245, 121.532882], [31.218830, 121.537567], [31.219335, 121.535586]]
+  const markers = route.getMapMarkers()
+  coordinates.forEach(([lat, lon], index) => {
+    const expected = route.wgs84ToGcj02(lat, lon)
+    assert.equal(markers[index + 1].latitude, expected.latitude)
+    assert.equal(markers[index + 1].longitude, expected.longitude)
+    assert.ok(route.TASK_TRACK_INDEX[index] > (route.TASK_TRACK_INDEX[index - 1] || 0))
+  })
+  assert.equal(markers[0].latitude, route.wgs84ToGcj02(31.221752, 121.531923).latitude)
+  assert.equal(markers[4].longitude, route.wgs84ToGcj02(31.221699, 121.531934).longitude)
+  assert.notEqual(markers[0].label.anchorX, markers[4].label.anchorX, 'nearby S/F labels are separated')
+  route.TRACK.forEach(([, lat, lon]) => {
+    assert.ok(Number.isFinite(lat) && lat >= route.BOUNDS.minLat && lat <= route.BOUNDS.maxLat)
+    assert.ok(Number.isFinite(lon) && lon >= route.BOUNDS.minLon && lon <= route.BOUNDS.maxLon)
+  })
+  let component
+  global.Component = (value) => { component = value }
+  try {
+    require(path.join(miniRoot, 'components', 'route-map', 'route-map.js'))
+    assert.deepEqual(component.data.polyline.map((line) => line.points), segments)
+  } finally {
+    delete global.Component
+  }
+  assert.deepEqual(require(path.join(miniRoot, 'utils', 'stations.js')).map((station) => station.distance),
+    ['约 350 m', '约 870 m', '约 1.07 km'])
+  assert.equal(route.TOTAL_DISTANCE_KM.toFixed(2), '1.66')
+})
+
+run('new route progress leaves prior route records intact', () => {
+  const route = require(path.join(miniRoot, 'utils', 'route.js'))
+  const store = require(path.join(miniRoot, 'utils', 'progress.js'))
+  const legacy = { routeId: 'route-01', completed: 3, startedAt: 1, completedAt: 99, photos: { 0: 'old-photo' } }
+  const storage = { 'patchwalk-progress-v3': legacy }
+  const original = JSON.stringify(storage)
+  global.wx = {
+    getStorageSync: (key) => storage[key],
+    setStorageSync: (key, value) => { storage[key] = value }
+  }
+  const current = store.ensureProgress()
+  assert.equal(current.completed, 0)
+  assert.equal(current.startedAt, 0)
+  assert.equal(current.routeId, route.ROUTE_ID)
+  assert.deepEqual(current.photos, {})
+  assert.equal(JSON.stringify({ 'patchwalk-progress-v3': storage['patchwalk-progress-v3'] }), original)
+  assert.equal(storage[`patchwalk-progress-v4-${route.ROUTE_ID}`].routeId, route.ROUTE_ID)
+  store.resetProgress()
+  assert.equal(storage['patchwalk-progress-v3'], legacy)
 })
 
 run('tab bar only points to existing pages', () => {
@@ -90,8 +189,9 @@ run('progress state normalizes and caps safely', () => {
   assert.equal(store.normalizeProgress({ completed: -3 }).completed, 0)
   assert.equal(store.normalizeProgress({ completed: 7 }).completed, 3)
   assert.equal(store.normalizeProgress({ completed: '2' }).completed, 2)
-  assert.equal(store.deriveStats({ completed: 3 }).distance, '1.56')
+  assert.equal(store.deriveStats({ completed: 3 }).distance, '1.66')
   assert.equal(store.deriveStats({ completed: 1 }).points, 1)
+  assert.equal(store.normalizeProgress({ participantId: 'abc123' }).participantId, 'abc123')
 })
 
 run('strict station workflow rejects every skipped step', () => {
@@ -295,7 +395,8 @@ run('check-in page exposes one platform-neutral QR action', () => {
   assert.doesNotMatch(script, /resolveLaunchOptions|LOCAL_LINK_MATCH|LOCAL_LINK_COMPAT/)
   assert.match(template, /扫码打卡/)
   assert.doesNotMatch(template, /uidCanonical|tagToken|qrToken|raw UID/i)
-  assert.match(template, /进度仅保存在当前设备/)
+  assert.match(template, /照片保存在当前设备/)
+  assert.match(template, /完赛昵称和起止时间提交给组织者/)
 })
 
 run('QR result survives the native scanner temporarily hiding the page', () => {
@@ -310,6 +411,7 @@ run('QR result survives the native scanner temporarily hiding the page', () => {
     setStorageSync: (key, value) => { storage[key] = value },
     scanCode: (options) => { scanOptions = options },
     vibrateShort: () => {},
+    switchTab: () => {},
     redirectTo: () => {}
   }
   delete require.cache[require.resolve(checkinPath)]
@@ -346,7 +448,7 @@ run('QR result survives the native scanner temporarily hiding the page', () => {
 run('photo persistence remains completely local at runtime', () => {
   const appScript = fs.readFileSync(path.join(miniRoot, 'app.js'), 'utf8')
   const photoScript = fs.readFileSync(path.join(miniRoot, 'utils', 'photo.js'), 'utf8')
-  assert.doesNotMatch(appScript, /wx\.cloud|cloudEnvId/)
+  assert.doesNotMatch(appScript, /uploadFile|cloudPath/)
   assert.doesNotMatch(photoScript, /wx\.cloud|uploadFile|cloudPath/)
   assert.match(photoScript, /wx\.saveFile/)
   assert.match(photoScript, /saveCheckInPhoto/)

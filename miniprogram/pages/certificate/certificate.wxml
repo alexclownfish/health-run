@@ -3,7 +3,7 @@
     <view class="certificate-top">
       <view class="decor decor-one"></view><view class="decor decor-two"></view>
       <text class="certificate-code mono">PATCH COMPLETE / RELEASE</text>
-      <text class="certificate-title">午间漫步 · 健康同行</text>
+      <text class="certificate-title">码上出发·健康同行</text>
       <text class="certificate-subtitle">完成实景健康路线</text>
       <view class="complete-seal">✓</view>
     </view>
@@ -23,7 +23,9 @@
         <text>完成时间 <text>{{completedTime}}</text></text>
         <text>总用时 <text>{{completionDuration}}</text></text>
       </view>
-      <view class="certificate-footer mono">HEALTH STATUS: RELEASED ✓</view>
+      <view class="certificate-footer">
+        <text class="certificate-participant mono">参与者编号：{{participantId || '上传后生成'}}</text>
+      </view>
     </view>
   </view>
 

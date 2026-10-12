@@ -1,0 +1,17 @@
+{
+  "enabled": false,
+  "mode": "production",
+  "environmentId": "health-run-d1gj2x9lm0e9ca17b",
+  "appId": "wx44b333d3d8cef506",
+  "activityId": "",
+  "title": "健康漫步正式活动",
+  "routeVersion": "route-01-v1",
+  "requiredPoints": ["001", "002", "003"],
+  "startPointCode": "000",
+  "finishPointCode": "999",
+  "startsAt": 0,
+  "endsAt": 0,
+  "reportingClosesAt": 0,
+  "excludedOpenIds": [],
+  "timeZone": "Asia/Shanghai"
+}

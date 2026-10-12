@@ -2,6 +2,7 @@ const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
 const { formatClock, formatDateCode, formatDuration } = require('../../utils/format')
 const userStore = require('../../utils/user')
+const completionReport = require('../../utils/completion-report')
 
 Page({
   data: {
@@ -9,6 +10,7 @@ Page({
     certificateId: '',
     completedTime: '',
     completionDuration: '--',
+    participantId: '',
     completed: 0,
     certificateReady: false,
     ownerName: '微信用户',
@@ -21,6 +23,10 @@ Page({
 
   onShow() {
     this.refreshCertificate()
+    const progress = progressStore.readProgress()
+    if (progressStore.isFinished(progress) && !progress.participantId) {
+      completionReport.report(progress).then(() => this.refreshCertificate())
+    }
   },
 
   refreshCertificate() {
@@ -32,6 +38,7 @@ Page({
       certificateId: formatDateCode(timestamp),
       completedTime: formatClock(timestamp),
       completionDuration: formatDuration(progress.startedAt, progress.completedAt),
+      participantId: progress.participantId || '',
       ownerName: userStore.readUser().nickName || '微信用户'
     })
   },
@@ -124,7 +131,7 @@ Page({
     context.fillText('PATCH COMPLETE / RELEASE', 76, 91)
     context.fillStyle = '#ffffff'
     context.font = '800 38px sans-serif'
-    context.fillText('午间漫步 · 健康同行', 76, 158)
+    context.fillText('码上出发·健康同行', 76, 158)
     context.fillStyle = '#fff0e4'
     context.font = '400 22px sans-serif'
     context.fillText('完成实景健康路线', 76, 208)
@@ -185,9 +192,9 @@ Page({
     context.moveTo(76, 978)
     context.lineTo(674, 978)
     context.stroke()
-    context.fillStyle = '#958b91'
-    context.font = '500 16px monospace'
-    context.fillText('HEALTH STATUS: RELEASED ✓', 375, 1019)
+    context.fillStyle = '#5664C2'
+    context.font = '600 18px monospace'
+    context.fillText(`参与者编号：${this.data.participantId || '上传后生成'}`, 375, 1019)
   },
 
   roundRect(context, x, y, width, height, radius, fillStyle) {
@@ -243,12 +250,12 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '我完成了午间漫步健康路线，3/3 点位全部打卡！',
+      title: '我完成了“码上出发·健康同行”活动，3/3 点位全部打卡！',
       path: '/pages/route/route'
     }
   },
 
   onShareTimeline() {
-    return { title: '午间漫步 · 健康同行' }
+    return { title: '码上出发·健康同行' }
   }
 })

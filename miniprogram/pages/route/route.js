@@ -2,9 +2,11 @@ const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
 const userStore = require('../../utils/user')
 const { getActivityContext } = require('../../utils/format')
+const routeData = require('../../utils/route')
 
 Page({
   data: {
+    totalDistance: routeData.TOTAL_DISTANCE_KM.toFixed(2),
     stations: [],
     completed: 0,
     started: false,

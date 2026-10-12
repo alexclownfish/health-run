@@ -1,6 +1,6 @@
 const routeData = require('../../utils/route')
 
-// The GPX is WGS84; route.js converts it to GCJ-02 for the native WeChat map.
+// Standard KML WGS84 coordinates are converted once for the native WeChat map.
 const MAP_POINTS = routeData.getMapPoints()
 const MAP_CENTER = routeData.getMapCenter()
 
@@ -19,8 +19,8 @@ Component({
     center: MAP_CENTER,
     points: MAP_POINTS,
     markers: [],
-    polyline: [{
-      points: MAP_POINTS,
+    polyline: routeData.getMapSegments().map((points) => ({
+      points,
       color: '#f76b2b',
       width: 7,
       borderColor: '#ffffff',
@@ -28,7 +28,7 @@ Component({
       arrowLine: false,
       dottedLine: false,
       level: 'abovelabels'
-    }]
+    }))
   },
 
   lifetimes: {

@@ -19,7 +19,7 @@
   </view>
 
   <view class="settings-list card">
-    <view bindtap="showPrivacy"><view class="setting-icon">◇</view><text>隐私与照片</text><text>仅自己可见</text><text class="chevron">›</text></view>
+    <view bindtap="showPrivacy"><view class="setting-icon">◇</view><text>隐私与照片</text><text>数据使用说明</text><text class="chevron">›</text></view>
     <view bindtap="resetProgress"><view class="setting-icon">↶</view><text>重置本次路线</text><text>{{completed}} / 3 点位</text><text class="chevron">›</text></view>
     <view bindtap="showHelp"><view class="setting-icon">?</view><text>打卡流程说明</text><text></text><text class="chevron">›</text></view>
   </view>

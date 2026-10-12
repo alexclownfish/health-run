@@ -2,6 +2,7 @@ const stations = require('../../utils/stations')
 const progressStore = require('../../utils/progress')
 const qrValidation = require('../../utils/qr-validation')
 const { QR_TAGS } = require('../../utils/qr-tags')
+const completionReport = require('../../utils/completion-report')
 
 const REASON_CONTENT = {
   NO_CURRENT_STATION: ['暂无待打卡点位', '路线可能已经完成，请返回路线页查看当前进度。'],
@@ -213,7 +214,7 @@ Page({
     let progress
     let identityMatches = false
     if (result.checkpointType === 'start') {
-      progress = progressStore.startCheckIn(result)
+      progress = progressStore.startCheckIn({ ...result, reportingContext: completionReport.captureContext() })
       identityMatches = progress.startCheckIn && progress.startCheckIn.qrId === result.qrId
     } else if (result.checkpointType === 'finish') {
       progress = progressStore.finishCheckIn(result)
@@ -227,6 +228,10 @@ Page({
       this.showRejected('WRONG_POINT', false)
       return
     }
+
+    const reportPromise = result.checkpointType === 'finish'
+      ? completionReport.report(progress)
+      : Promise.resolve()
 
     this.accepted = true
     this.acceptedCheckpointType = result.checkpointType
@@ -252,23 +257,26 @@ Page({
       success: true
     })
     if (typeof wx.vibrateShort === 'function') wx.vibrateShort({ type: 'medium' })
-    this.scheduleActionNavigation()
-  },
+    this.scheduleActionNavigation(reportPromise)
+ },
 
-  scheduleActionNavigation() {
-    this.stopPending()
-    this.navigationTimer = setTimeout(() => {
-      this.navigationTimer = null
+  scheduleActionNavigation(afterReport = Promise.resolve()) {
+   this.stopPending()
+    Promise.resolve(afterReport).catch(() => {}).then(() => {
       if (!this.pageActive || !this.accepted) return
-      if (this.acceptedCheckpointType === 'start') {
-        wx.switchTab({ url: '/pages/route/route' })
-      } else if (this.acceptedCheckpointType === 'finish') {
-        wx.redirectTo({ url: '/pages/certificate/certificate' })
-      } else {
-        wx.redirectTo({ url: `/pages/action/action?station=${this.acceptedStationIndex}` })
-      }
-    }, 700)
-  },
+      this.navigationTimer = setTimeout(() => {
+        this.navigationTimer = null
+        if (!this.pageActive || !this.accepted) return
+        if (this.acceptedCheckpointType === 'start') {
+          wx.switchTab({ url: '/pages/route/route' })
+        } else if (this.acceptedCheckpointType === 'finish') {
+          wx.redirectTo({ url: '/pages/certificate/certificate' })
+        } else {
+          wx.redirectTo({ url: `/pages/action/action?station=${this.acceptedStationIndex}` })
+        }
+      }, 700)
+    })
+ },
 
   showRejected(reasonCode, retryable) {
     const content = REASON_CONTENT[reasonCode] || ['暂时无法打卡', '请返回路线页后重新尝试。']

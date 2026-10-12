@@ -21,7 +21,7 @@
     <view class="challenge-ring ring-two"></view>
     <view class="challenge-copy">
       <text class="challenge-code mono">TODAY / ROUTE 01</text>
-      <text class="challenge-title">1.56 公里实景健康漫步</text>
+      <text class="challenge-title">{{totalDistance}} 公里实景健康漫步</text>
       <text class="challenge-desc">沿真实轨迹行进，完成 3 次身体唤醒</text>
     </view>
     <view class="challenge-time"><text>15–20</text><text>分钟</text></view>

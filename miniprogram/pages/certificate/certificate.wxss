@@ -9,6 +9,7 @@
 .decor-one { left: -90rpx; bottom: -80rpx; width: 270rpx; height: 180rpx; }.decor-two { right: -20rpx; top: -120rpx; width: 270rpx; height: 220rpx; }
 .certificate-body { padding: 42rpx 36rpx 27rpx; text-align: center; }
 .certificate-id { color: var(--orange); font-size: 19rpx; }
+.certificate-participant { display: block; color: var(--indigo); font-size: 17rpx; line-height: 1.6; overflow-wrap: anywhere; }
 .certificate-owner { display: block; margin-top: 12rpx; font-size: 21rpx; font-weight: 700; }
 .score { margin: 34rpx 0; }
 .score text { display: block; }

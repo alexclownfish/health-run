@@ -1,6 +1,4 @@
 {
   "navigationBarTitleText": "完赛凭证",
-  "navigationBarBackgroundColor": "#FFF8F0",
-  "enableShareAppMessage": true,
-  "enableShareTimeline": true
+  "navigationBarBackgroundColor": "#FFF8F0"
 }

@@ -2,6 +2,12 @@
   "name": "health-run",
   "private": true,
   "scripts": {
-    "test": "node tests/run-tests.js"
+    "test": "node tests/run-tests.js && node tests/completion-tests.js",
+    "export:finishers": "node tools/export-finishers/index.js"
+  },
+  "devDependencies": {
+    "@cloudbase/node-sdk": "3.18.3",
+    "exceljs": "4.4.0",
+    "wx-server-sdk": "3.0.4"
   }
 }

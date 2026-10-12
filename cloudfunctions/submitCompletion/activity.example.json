@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "mode": "test",
+  "environmentId": "cloudbase-d2gd1ocuha5342ad6",
+  "appId": "wx44b333d3d8cef506",
+  "activityId": "health-run-test-20261011",
+  "title": "健康漫步测试活动",
+  "routeVersion": "route-20261011-v1",
+  "requiredPoints": ["001", "002", "003"],
+  "startPointCode": "000",
+  "finishPointCode": "999",
+  "startsAt": 1791475200000,
+  "endsAt": 1794153600000,
+  "reportingClosesAt": 1794240000000,
+  "excludedOpenIds": [],
+  "timeZone": "Asia/Shanghai"
+}

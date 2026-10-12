@@ -31,7 +31,10 @@ const html = replaceLiteral(
     `const previewData = ${JSON.stringify({
     stations,
     points: route.getMapPoints(),
-    taskIndexes: route.TASK_TRACK_INDEX
+    segments: route.getMapSegments(),
+    markers: route.getMapMarkers(),
+    taskDistances: route.TASK_DISTANCE_KM,
+    totalDistance: route.TOTAL_DISTANCE_KM
   })};`
   ),
   '/* PREVIEW_SCRIPT */',

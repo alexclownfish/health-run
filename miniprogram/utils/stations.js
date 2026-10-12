@@ -1,10 +1,17 @@
+const routeData = require('./route')
+
+function distanceLabel(index) {
+  const km = routeData.TASK_DISTANCE_KM[index]
+  return km < 1 ? `约 ${Math.round(km * 1000 / 10) * 10} m` : `约 ${km.toFixed(2)} km`
+}
+
 const stations = [
   {
     id: 1,
     title: '肩颈舒展',
-    location: '轨迹标注点 0',
-    distance: '约 830 m',
-    sourceMarker: '0',
+    location: routeData.CHECKPOINTS[0].name,
+    distance: distanceLabel(0),
+    sourceMarker: '1',
     tag: '舒展',
     motion: '抬头看天 · 肩胛骨后夹',
     heading: '打开胸腔，深呼吸',
@@ -16,9 +23,9 @@ const stations = [
   {
     id: 2,
     title: '手腕放松',
-    location: '轨迹标注点 3',
-    distance: '约 920 m',
-    sourceMarker: '3',
+    location: routeData.CHECKPOINTS[1].name,
+    distance: distanceLabel(1),
+    sourceMarker: '2',
     tag: '放松',
     motion: '手臂前伸 · 掌心向外',
     heading: '伸展手腕，放松指尖',
@@ -30,9 +37,9 @@ const stations = [
   {
     id: 3,
     title: '腰背激活',
-    location: '轨迹标注点 4',
-    distance: '约 1.02 km',
-    sourceMarker: '4',
+    location: routeData.CHECKPOINTS[2].name,
+    distance: distanceLabel(2),
+    sourceMarker: '3',
     tag: '激活',
     motion: '双手扶髋 · 身体侧屈',
     heading: '唤醒腰背，找回支撑',

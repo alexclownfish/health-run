@@ -1,7 +1,7 @@
-// Old route times did not come from start/finish scans; keep that storage untouched.
-const KEY = 'patchwalk-progress-v3'
 const { QR_TAGS } = require('./qr-tags')
 const routeData = require('./route')
+// Each route starts fresh; previous route records remain under their original keys.
+const KEY = `patchwalk-progress-v4-${routeData.ROUTE_ID}`
 const ROUTE_DISTANCE = routeData.TASK_DISTANCE_KM
 
 function defaultProgress() {
@@ -11,11 +11,13 @@ function defaultProgress() {
     completedAt: 0,
     startCheckIn: null,
     finishCheckIn: null,
+    participantId: '',
+    reportingContext: null,
     checkins: {},
     actions: {},
     photos: {},
     history: [],
-    routeId: 'route-01'
+    routeId: routeData.ROUTE_ID
   }
 }
 
@@ -30,11 +32,13 @@ function normalizeProgress(value) {
     completedAt: Number(source.completedAt) || 0,
     startCheckIn: source.startCheckIn && typeof source.startCheckIn === 'object' ? source.startCheckIn : null,
     finishCheckIn: source.finishCheckIn && typeof source.finishCheckIn === 'object' ? source.finishCheckIn : null,
+    participantId: typeof source.participantId === 'string' ? source.participantId : '',
+    reportingContext: source.reportingContext && typeof source.reportingContext === 'object' ? source.reportingContext : null,
     checkins: source.checkins && typeof source.checkins === 'object' ? source.checkins : {},
     actions: source.actions && typeof source.actions === 'object' ? source.actions : {},
     photos: source.photos && typeof source.photos === 'object' ? source.photos : {},
     history: Array.isArray(source.history) ? source.history : [],
-    routeId: source.routeId || 'route-01'
+    routeId: source.routeId || routeData.ROUTE_ID
   }
 }
 
@@ -84,6 +88,8 @@ function startCheckIn(metadata = {}) {
   const evidence = checkpointEvidence(metadata)
   current.startedAt = evidence.at
   current.startCheckIn = evidence
+  current.reportingContext = metadata.reportingContext && typeof metadata.reportingContext === 'object'
+    ? { ...metadata.reportingContext } : null
   return saveProgress(current)
 }
 
@@ -196,6 +202,12 @@ function resetProgress() {
   return saveProgress(next)
 }
 
+function saveParticipantId(value) {
+  const current = readProgress()
+  current.participantId = typeof value === 'string' ? value : ''
+  return saveProgress(current)
+}
+
 function deriveStats(value) {
   const current = normalizeProgress(value)
   const distance = current.completed === 0
@@ -235,5 +247,6 @@ module.exports = {
   canUpload,
   completeStation,
   resetProgress,
+  saveParticipantId,
   deriveStats
 }

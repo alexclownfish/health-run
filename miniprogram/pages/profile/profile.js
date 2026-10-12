@@ -54,7 +54,7 @@ Page({
   showPrivacy() {
     wx.showModal({
       title: '隐私与照片',
-      content: '头像和昵称来自微信授权控件；打卡照片仅用于本次路线记录，当前版本不会公开展示。',
+      content: '照片和头像保存在当前设备，不会上传。活动开启名单收集后，微信昵称、活动编号、完成点位及起止时间会提交给组织者用于完赛名单，只有授权管理员可导出；不用于排名。',
       showCancel: false,
       confirmText: '知道了',
       confirmColor: '#5664C2'
