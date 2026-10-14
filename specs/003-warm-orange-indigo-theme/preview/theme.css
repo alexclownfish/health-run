@@ -198,3 +198,28 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
   .swatches { gap: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .snapshot *, .snapshot *::before { animation: none !important; transition: none !important; } }
+
+/* Display each original square panel without stretching the artwork. */
+.snapshot .motion-card {
+  height: 0;
+  display: block;
+  padding: 0 0 100%;
+  border: 0;
+  background: #edf4fd;
+}
+.snapshot .action-guide-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.snapshot .action-guide-frame img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 300%;
+  max-width: none;
+  height: auto;
+}
+.snapshot .action-guide-frame.scene-wrist img { left: -100%; }
+.snapshot .action-guide-frame.scene-back img { left: -200%; }

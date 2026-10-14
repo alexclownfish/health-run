@@ -12,6 +12,8 @@
 
 **Supersedes**: `specs/001-nfc-checkin-validation` 及本目录早期的 Android/HarmonyOS NFC、iOS QR 混合方案。旧文件保留用于追溯。
 
+**2026-10-13 extension**: 最新制作格式见[二维码使用提示](../008-qr-usage-guidance/spec.md)。在原HRQ1数据前加入固定“绿色康跑”使用提示，新版仍兼容单行旧码；下文原始格式是校验的数据行。本次不改点位身份和原打卡业务。
+
 ## User Scenarios & Testing
 
 ### User Story 1: 当前点位扫码

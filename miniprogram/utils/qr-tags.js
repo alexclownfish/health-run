@@ -1,3 +1,5 @@
+const QR_USAGE_HINT = '请在微信小程序「绿色康跑」内点击“扫码打卡”使用。'
+
 const QR_TAGS = [
   {
     qrId: 'QR-START-A',
@@ -47,10 +49,10 @@ const QR_TAGS = [
     payloadVersion: 1,
     enabled: true
   }
-].map((item) => ({
-  ...item,
-  payload: `HRQ${item.payloadVersion}|${item.pointCode}|${item.qrId}|${item.qrToken}`
-}))
+].map((item) => {
+  const legacyPayload = `HRQ${item.payloadVersion}|${item.pointCode}|${item.qrId}|${item.qrToken}`
+  return { ...item, legacyPayload, payload: `${QR_USAGE_HINT}\n${legacyPayload}` }
+})
 
 function hasDuplicates(values) {
   return new Set(values).size !== values.length
@@ -63,7 +65,8 @@ function getQrInventoryStatus(qrTags = QR_TAGS) {
     !/^QR-[A-Z0-9-]{1,24}$/.test(item.qrId) ||
     !/^[A-Za-z0-9_-]{22,64}$/.test(item.qrToken) ||
     item.payloadVersion !== 1 ||
-    item.payload !== `HRQ1|${item.pointCode}|${item.qrId}|${item.qrToken}` ||
+    item.legacyPayload !== `HRQ1|${item.pointCode}|${item.qrId}|${item.qrToken}` ||
+    item.payload !== `${QR_USAGE_HINT}\n${item.legacyPayload}` ||
     !['start', 'station', 'finish'].includes(item.checkpointType) ||
     !Number.isInteger(item.checkpointIndex) ||
     (item.checkpointType === 'station' && (!Number.isInteger(item.stationIndex) ||
@@ -86,5 +89,6 @@ function getQrInventoryStatus(qrTags = QR_TAGS) {
 
 module.exports = {
   QR_TAGS,
+  QR_USAGE_HINT,
   getQrInventoryStatus
 }

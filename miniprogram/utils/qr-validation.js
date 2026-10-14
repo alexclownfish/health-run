@@ -1,3 +1,5 @@
+const { QR_USAGE_HINT } = require('./qr-tags')
+
 const QR_PATTERN = /^HRQ(\d+)\|(\d{3})\|(QR-[A-Z0-9-]{1,24})\|([A-Za-z0-9_-]{22,64})$/
 
 const ASSURANCE = {
@@ -15,7 +17,9 @@ function readScanResult(value) {
 }
 
 function parseQrPayload(value) {
-  const raw = readScanResult(value)
+  const text = readScanResult(value).replace(/\r\n/g, '\n')
+  const prefix = `${QR_USAGE_HINT}\n`
+  const raw = text.startsWith(prefix) ? text.slice(prefix.length) : text
   const match = QR_PATTERN.exec(raw)
   if (!match) return rejected('QR_INVALID', true)
   const payloadVersion = Number(match[1])
@@ -39,7 +43,7 @@ function validateQrResult({ expectedStationIndex, expectedCheckpointType, result
   const parsed = parseQrPayload(result)
   if (!parsed.ok) return parsed
   const matches = (Array.isArray(qrTags) ? qrTags : []).filter((item) => (
-    item && item.enabled !== false && item.payload === parsed.raw
+    item && item.enabled !== false && item.legacyPayload === parsed.raw
   ))
   if (!matches.length) return rejected('QR_UNKNOWN')
   if (matches.length !== 1) return rejected('QR_CONFIG_DUPLICATE')

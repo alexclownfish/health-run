@@ -4,6 +4,7 @@
 
 - Upload the latest build using the real AppID and select it as the experience version.
 - Print the five exact payloads in `specs/004-start-finish-qr-timing/qr-payloads.md` as ordinary text QR codes.
+- Current printing content includes the exact Chinese guidance line followed by the original HRQ1 line. Upload the compatible mini-program first, then replace signs; the old build rejects new guided codes. The new build accepts both old and new codes. See [guidance release checks](../008-qr-usage-guidance/quickstart.md).
 - Prepare representative Android, HarmonyOS, and iOS phones.
 - Use the same tests on each device; no NFC setting or tag is required.
 

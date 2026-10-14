@@ -298,7 +298,8 @@ run('production check-in entry is manual and has no local skip', () => {
 })
 
 run('packaged QR inventory is exact, unique, and non-URL', () => {
-  const { QR_TAGS, getQrInventoryStatus } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
+  const { QR_TAGS, QR_USAGE_HINT, getQrInventoryStatus } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
+  assert.equal(QR_USAGE_HINT, '请在微信小程序「绿色康跑」内点击“扫码打卡”使用。')
   assert.equal(QR_TAGS.length, 5)
   assert.equal(new Set(QR_TAGS.map((item) => item.qrId)).size, QR_TAGS.length)
   assert.equal(new Set(QR_TAGS.map((item) => item.qrToken)).size, QR_TAGS.length)
@@ -306,10 +307,55 @@ run('packaged QR inventory is exact, unique, and non-URL', () => {
     assert.match(item.qrToken, /^[A-Za-z0-9_-]{22,64}$/)
     assert.equal(item.payloadVersion, 1)
     assert.doesNotMatch(item.payload, /^https?:/i)
+    assert.equal(item.legacyPayload, `HRQ1|${item.pointCode}|${item.qrId}|${item.qrToken}`)
+    assert.equal(item.payload, `${QR_USAGE_HINT}\n${item.legacyPayload}`)
   }
   assert.deepEqual(QR_TAGS.map((item) => item.checkpointType), ['start', 'station', 'station', 'station', 'finish'])
   assert.deepEqual(QR_TAGS.map((item) => item.pointCode), ['000', '001', '002', '003', '999'])
   assert.equal(getQrInventoryStatus().releaseReady, true)
+})
+
+run('five checkpoints accept guided LF and CRLF codes and their original codes only at the matching point', () => {
+  const validation = require(path.join(miniRoot, 'utils', 'qr-validation.js'))
+  const { QR_TAGS } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
+  QR_TAGS.forEach((expected) => {
+    QR_TAGS.forEach((scanned) => {
+      for (const result of [scanned.payload, scanned.payload.replace('\n', '\r\n'), scanned.legacyPayload]) {
+        const verdict = validation.validateQrResult({
+          expectedCheckpointType: expected.checkpointType,
+          expectedStationIndex: expected.stationIndex,
+          result: { result },
+          qrTags: QR_TAGS
+        })
+        assert.equal(verdict.ok, expected.qrId === scanned.qrId)
+        if (verdict.ok) assert.equal(verdict.qrId, expected.qrId)
+        else assert.equal(verdict.reasonCode, 'WRONG_POINT')
+      }
+    })
+  })
+})
+
+run('QR guidance cannot conceal altered, unknown, disabled, duplicated, or concatenated input', () => {
+  const validation = require(path.join(miniRoot, 'utils', 'qr-validation.js'))
+  const { QR_TAGS, QR_USAGE_HINT } = require(path.join(miniRoot, 'utils', 'qr-tags.js'))
+  const valid = QR_TAGS[1]
+  const check = (result, qrTags = QR_TAGS) => validation.validateQrResult({ expectedStationIndex: 0, result, qrTags })
+  for (const result of [
+    valid.payload.replace('绿色康跑', '其他小程序'),
+    `${QR_USAGE_HINT}${valid.legacyPayload}`,
+    `${QR_USAGE_HINT}\n\n${valid.legacyPayload}`,
+    `${QR_USAGE_HINT}\n${valid.payload}`,
+    `${valid.payload}\n${QR_TAGS[2].legacyPayload}`,
+    `${valid.payload}\n额外文字`,
+    `${valid.legacyPayload}\n${QR_USAGE_HINT}`,
+    `${QR_USAGE_HINT}\nhttps://example.com`,
+    `${QR_USAGE_HINT}\nHRQ2|001|QR-001-A|${valid.qrToken}`
+  ]) assert.equal(check(result).reasonCode, 'QR_INVALID', result)
+  assert.equal(check(`${QR_USAGE_HINT}\nHRQ1|001|QR-001-A|unknown-token-value-1234`).reasonCode, 'QR_UNKNOWN')
+  assert.equal(check(valid.payload, [{ ...valid, enabled: false }]).reasonCode, 'QR_UNKNOWN')
+  for (const result of [valid.payload, valid.legacyPayload]) {
+    assert.equal(check(result, [valid, { ...valid }]).reasonCode, 'QR_CONFIG_DUPLICATE')
+  }
 })
 
 run('QR validation requires exact HRQ1 inventory and current point', () => {

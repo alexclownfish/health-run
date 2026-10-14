@@ -4,17 +4,8 @@
     <text>✓</text>
   </view>
 
-  <view class="motion-card">
-    <view class="motion-orbit orbit-one"></view>
-    <view class="motion-orbit orbit-two"></view>
-    <view class="motion-person motion-{{stationIndex}}">
-      <view class="head"></view>
-      <view class="neck"></view>
-      <view class="body"></view>
-      <view class="arm left-arm"><view class="hand"></view></view>
-      <view class="arm right-arm"><view class="hand"></view></view>
-    </view>
-    <view class="motion-label">↑ {{station.motion}}</view>
+  <view class="motion-card motion-{{stationIndex}}">
+    <image class="action-guide-image" src="/assets/action-guide-reference.png" mode="widthFix" />
   </view>
 
   <view class="instruction">

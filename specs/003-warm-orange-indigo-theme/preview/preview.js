@@ -9,11 +9,16 @@ const pageLabels = {
   profile: '个人中心'
 }
 
-const state = { page: 'all', progress: 0, scan: 'idle', action: 'idle', photo: 'idle' }
+const state = { page: 'all', progress: 0, scan: 'idle', actionDemo: 0, action: 'idle', photo: 'idle' }
 const screens = document.getElementById('screens')
 const picker = document.getElementById('page-picker')
 const station = (index = 0) => previewData.stations[index]
 const previewDistance = () => (state.progress === 3 ? previewData.totalDistance : state.progress ? previewData.taskDistances[state.progress - 1] : 0).toFixed(2)
+const actionScenes = [
+  { key: 'shoulder', station: 0 },
+  { key: 'wrist', station: 1 },
+  { key: 'back', station: 2 }
+]
 
 function icon(name) {
   return `<i data-lucide="${name}" aria-hidden="true"></i>`
@@ -59,9 +64,15 @@ function checkinPage() {
   return `<div class="device">${systemBar()}${nativeHeader('点位打卡', `点位 1 · ${station(0).title}`)}<div class="screen-body"><view class="snapshot"><view class="page checkin-page"><view class="status-line"><view class="status-dot ${state.scan === 'success' ? 'success' : state.scan === 'error' || state.scan === 'cancel' ? 'error' : 'active'}"></view><text class="mono">${status}</text></view><view class="reader reader-qr ${extra}"><view class="reader-ring ring-a"></view><view class="reader-ring ring-b"></view><view class="reader-phone"><view class="reader-speaker"></view><text>${glyph}</text></view>${state.scan === 'scanning' ? '<view class="reader-tag">CODE</view>' : ''}</view><view class="result-copy"><text class="eyebrow">POINT 1 / ${station(0).location}</text><text class="result-title">${state.scan === 'idle' ? '准备扫码' : status}</text><text class="result-message">${message}</text></view><view class="assurance-note"><text class="note-title">本机验证</text><text>打卡进度仅保存在当前设备。清除数据、重装或更换手机后无法恢复。</text></view><view class="checkin-actions"><button class="primary-button" ${state.scan === 'success' ? 'disabled' : ''}>${state.scan === 'success' ? '已完成扫码' : state.scan === 'idle' ? '扫码打卡' : '重新尝试'} ${icon('scan-line')}</button><button class="secondary-button">返回路线</button></view></view></div></div><div class="home-indicator"></div></div>`
 }
 
+function actionIllustration(scene) {
+  return `<div class="action-guide-frame scene-${scene.key}" role="img" aria-label="${station(scene.station).title}动作原图示意"><img src="assets/action-guide-reference.png" alt="${station(scene.station).title}动作原图示意" /></div>`
+}
+
 function actionPage() {
+  const scene = actionScenes[state.actionDemo]
+  const item = station(scene.station)
   const actionLabel = state.action === 'complete' ? '动作完成' : state.action === 'running' ? '暂停' : '开始动作'
-  return `<div class="device">${systemBar()}${nativeHeader('点位 1 · 肩颈舒展', '扫码已核对 · ${station(0).location}')}<div class="screen-body"><view class="snapshot"><view class="page action-page with-fixed-action"><view class="checkpoint-bar"><view><view class="status-dot success"></view><text class="mono">PATCH_01 / POINT VERIFIED</text></view><text>✓</text></view><view class="motion-card"><view class="motion-orbit orbit-one"></view><view class="motion-orbit orbit-two"></view><view class="motion-person"><view class="head"></view><view class="neck"></view><view class="body"></view><view class="arm left-arm"><view class="hand"></view></view><view class="arm right-arm"><view class="hand"></view></view></view><view class="motion-label">↑ 抬头看天 · 肩胛骨后夹</view></view><view class="instruction"><text class="eyebrow">01 / 保持站立</text><text class="instruction-title">打开胸腔，深呼吸</text><text class="instruction-copy">双脚站稳，手臂自然抬起，肩胛骨向后轻夹，感受胸前舒展。</text></view><view class="timer-card card"><text class="timer-text mono">${state.action === 'complete' ? '00:00' : state.action === 'running' ? '00:07' : '00:10'}</text><button class="timer-button ${state.action === 'complete' ? 'complete' : ''}">${actionLabel} ${icon(state.action === 'complete' ? 'check' : 'play')}</button></view><view class="safety-card"><view class="safety-icon">♢</view><view><text>安全提示</text><text>动作缓慢、不憋气；如有明显不适，请立即停止。</text></view></view>${fixedAction(state.action === 'complete' ? '动作完成，去拍照' : '先完成动作计时', 'camera', state.action !== 'complete')}</view></div></div><div class="home-indicator"></div></div>`
+  return `<div class="device">${systemBar()}${nativeHeader(`点位 ${item.id} · ${item.title}`, `扫码已核对 · ${item.location}`)}<div class="screen-body"><view class="snapshot"><view class="page action-page with-fixed-action"><view class="checkpoint-bar"><view><view class="status-dot success"></view><text class="mono">PATCH_0${item.id} / POINT VERIFIED</text></view><text>✓</text></view><view class="motion-card motion-${scene.key}">${actionIllustration(scene)}</view><view class="instruction"><text class="eyebrow">0${item.id} / 保持站立</text><text class="instruction-title">${item.heading}</text><text class="instruction-copy">${item.instruction}</text></view><view class="timer-card card"><text class="timer-text mono">${state.action === 'complete' ? '00:00' : state.action === 'running' ? '00:07' : item.duration === 12 ? '00:12' : '00:10'}</text><button class="timer-button ${state.action === 'complete' ? 'complete' : ''}">${actionLabel} ${icon(state.action === 'complete' ? 'check' : 'play')}</button></view><view class="safety-card"><view class="safety-icon">♢</view><view><text>安全提示</text><text>${item.safety}</text></view></view>${fixedAction(state.action === 'complete' ? '动作完成，去拍照' : '先完成动作计时', 'camera', state.action !== 'complete')}</view></div></div><div class="home-indicator"></div></div>`
 }
 
 function uploadPage() {
@@ -149,13 +160,14 @@ function render() {
   renderPicker()
   const visible = state.page === 'all' ? ['route', 'checkin', 'action', 'upload', 'certificate', 'records', 'profile'] : [state.page]
   screens.classList.toggle('single', visible.length === 1)
-  screens.innerHTML = visible.map((page) => `<article><h2 class="screen-title"><span>${pageLabels[page]}</span><span>${page === 'route' ? `${state.progress}/3` : page === 'checkin' ? state.scan.toUpperCase() : page === 'action' ? state.action.toUpperCase() : page === 'upload' ? state.photo.toUpperCase() : 'PREVIEW'}</span></h2>${pageMarkup(page)}</article>`).join('')
+  screens.innerHTML = visible.map((page) => `<article><h2 class="screen-title"><span>${pageLabels[page]}</span><span>${page === 'route' ? `${state.progress}/3` : page === 'checkin' ? state.scan.toUpperCase() : page === 'action' ? `${actionScenes[state.actionDemo].key.toUpperCase()} · ${state.action.toUpperCase()}` : page === 'upload' ? state.photo.toUpperCase() : 'PREVIEW'}</span></h2>${pageMarkup(page)}</article>`).join('')
   drawMaps()
   refreshIcons()
 }
 
 document.getElementById('progress-picker').addEventListener('change', (event) => { state.progress = Number(event.target.value); render() })
 document.getElementById('scan-picker').addEventListener('change', (event) => { state.scan = event.target.value; render() })
+document.getElementById('action-demo-picker').addEventListener('change', (event) => { state.actionDemo = Number(event.target.value); render() })
 document.getElementById('action-picker').addEventListener('change', (event) => { state.action = event.target.value; render() })
 document.getElementById('photo-picker').addEventListener('change', (event) => { state.photo = event.target.value; render() })
 render()
