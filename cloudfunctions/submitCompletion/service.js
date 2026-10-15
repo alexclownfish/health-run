@@ -18,6 +18,11 @@ async function submit(payload, context, config, repository, now = Date.now()) {
     await repository.create(collection, record)
     return receipt(record, 'accepted')
   } catch (error) {
+    console.error('[submitCompletion] database write failed', {
+      name: error && error.name || '',
+      code: error && (error.code || error.errCode) || '',
+      message: error && error.message || ''
+    })
     // A deterministic _id makes concurrent inserts atomic; never overwrite a finish.
     try {
       const existing = await repository.find(collection, record._id)
@@ -26,7 +31,13 @@ async function submit(payload, context, config, repository, now = Date.now()) {
         validStoredRecord(existing, config, now)) {
         return receipt(existing, 'alreadyAccepted')
       }
-    } catch (readError) { /* Return a retryable error without leaking SDK details. */ }
+    } catch (readError) {
+      console.error('[submitCompletion] duplicate lookup failed', {
+        name: readError && readError.name || '',
+        code: readError && (readError.code || readError.errCode) || '',
+        message: readError && readError.message || ''
+      })
+    }
     return { ok: false, reasonCode: 'SERVICE_UNAVAILABLE' }
   }
 }

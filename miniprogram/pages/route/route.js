@@ -152,5 +152,18 @@ Page({
 
   openCheckin() {
     wx.navigateTo({ url: '/pages/checkin/checkin' })
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '码上出发·健康同行，一起走完这条健康路线',
+      path: '/pages/route/route'
+    }
+  },
+
+  onShareTimeline() {
+    return {
+      title: '码上出发·健康同行'
+    }
   }
 })

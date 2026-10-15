@@ -42,7 +42,7 @@ ACTIVITY_CONFIG 是每个云环境中 submitCompletion 的 JSON 环境变量，�
 
 ## Local Context and Outbox
 
-客户端 completionReporting.enabled 是总开关，targets.test.enabled / targets.production.enabled 独立决定目标是否允许上报；缺失、false 均关闭。当前仅 test=true，production=false。
+客户端 completionReporting.enabled 是总开关，targets.test.enabled / targets.production.enabled 独立决定目标是否允许上报；缺失、false 均关闭。当前 test=false、production=true，正式版路由到正式云环境。
 关闭目标时不捕获新上下文、不初始化云环境，也不补发该目标已排队记录。两个目标的环境 ID 仍须不同。
 
 起点 `progress.reportingContext`：mode、envId、activityId、routeVersion、clientEnvVersion。

@@ -263,26 +263,34 @@ test('client master switch and target switch fail closed and enforce distinct en
   state.settings.targets.test.envId = 'prod-env'
   assert.equal(state.client.captureContext(), null)
 })
-test('bundled settings enable development/trial while released builds cannot report', async () => {
+test('bundled settings enable test and production reporting independently', async () => {
   const settings = clone(require('../miniprogram/utils/config').completionReporting)
   assert.equal(settings.enabled, true)
   for (const version of ['develop', 'trial']) {
     const state = device(version)
     state.settings = clone(settings)
-    state.progress = finishedProgress(state.client.captureContext())
+    const context = state.client.captureContext()
+    if (!settings.targets.test.enabled) {
+      assert.equal(context, null)
+      continue
+    }
+    state.progress = finishedProgress(context)
     await state.client.report(state.progress)
     assert.equal(state.calls.length, 1)
     assert.equal(state.calls[0].config.env, 'cloudbase-d2gd1ocuha5342ad6')
   }
   const state = device('release')
   state.settings = clone(settings)
-  state.settings.targets.production.activityId = 'configured-event'
-  state.progress = finishedProgress({ mode: 'production', ...state.settings.targets.production, clientEnvVersion: 'release' })
-  assert.equal(state.client.captureContext(), null)
-  assert.equal(state.client.enqueue(state.progress), false)
-  await state.client.flush()
-  assert.equal(state.calls.length, 0)
-  assert.equal(state.initialized, undefined)
+  const context = state.client.captureContext()
+  if (!settings.targets.production.enabled) {
+    assert.equal(context, null)
+    return
+  }
+  state.progress = finishedProgress(context)
+  assert.equal(context.envId, 'health-run-d1gj2x9lm0e9ca17b')
+  await state.client.report(state.progress)
+  assert.equal(state.calls.length, 1)
+  assert.equal(state.calls[0].config.env, 'health-run-d1gj2x9lm0e9ca17b')
 })
 test('development template matches bundled client and accepts only its test environment', () => {
   const config = require('../cloudfunctions/submitCompletion/activity.example.json')

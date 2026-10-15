@@ -6,6 +6,7 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 exports.main = async (event) => {
   let config
   try { config = JSON.parse(process.env.ACTIVITY_CONFIG || '{}') } catch (error) {
+    console.error('[submitCompletion] invalid ACTIVITY_CONFIG')
     return { ok: false, reasonCode: 'CONFIG_INVALID' }
   }
   const db = cloud.database()
@@ -16,5 +17,11 @@ exports.main = async (event) => {
       return Array.isArray(result.data) ? result.data[0] : result.data
     }
   }
-  return submit(event, cloud.getWXContext(), config, repository)
+  const result = await submit(event, cloud.getWXContext(), config, repository)
+  console.info('[submitCompletion] result', {
+    ok: result && result.ok === true,
+    status: result && result.status || '',
+    reasonCode: result && result.reasonCode || ''
+  })
+  return result
 }

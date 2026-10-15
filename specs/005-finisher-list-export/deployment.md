@@ -99,7 +99,7 @@ startsAt/endsAt 限制手机起止时间；reportingClosesAt 限制服务器接�
 
 ## 6. 填写小程序配置并启用
 
-`miniprogram/utils/config.js` 的两个环境 ID 已填写，总开关和 test.enabled 为 true，production.enabled 为 false。本轮仅开发/体验上报；正式开关需在后续正式活动准备完成后明确启用：
+`miniprogram/utils/config.js` 的两个环境 ID、活动编号和路线版本已填写，总开关为 true，当前 test.enabled=false、production.enabled=true，正式版上报到正式云环境：
 
 ```js
 completionReporting: {
@@ -113,17 +113,17 @@ completionReporting: {
       routeVersion: 'route-20261011-v1'
     },
     production: {
-      enabled: false,
+      enabled: true,
       envId: 'health-run-d1gj2x9lm0e9ca17b',
-      activityId: '与正式云端一致的活动ID',
-      routeVersion: 'route-01-v1'
+      activityId: 'health-run-2026-event01',
+      routeVersion: 'route-20261011-v1'
     }
   }
 }
 ```
 
 这里不填 OPENID、管理员密钥、名单地址。配置中的活动/版本必须与对应云端一致。
-编译并上传体验版，使用新一轮起点开始测试；旧测试凭证不会因打开或升级自动上传，开始时未启用的旧进度也不回填。
+编译并上传体验版，使用新一轮起点开始测试；旧测试凭证不会因打开或升级自动上传，开始时未启用的旧进度也不回填。正式版发布后从新一轮起点开始，才会绑定正式收集。
 开发版/体验版只能得到测试名单；正式活动必须审核发布正式版，正式版新起点才绑定正式收集。
 测试中进行到第三点不产生摘要，成功终点才上报；旧测试进度在升级后需要重置并重新从起点开始。
 上报不会增加可见导出入口，失败不影响本地凭证或照片。
